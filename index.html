@@ -4,21 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wizard's Chess 3D - The Chamber of the Stone</title>
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+
     <!-- Three.js r128 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <!-- Three.js OrbitControls -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    <!-- GSAP for cinematic animations -->
+
+    <!-- Three.js Post-processing for Unreal Cinematic Bloom -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+
+    <!-- GSAP for Cinematic Animations -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <!-- Chess.js rules engine -->
+
+    <!-- Chess.js Rules Engine -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+
     <!-- Google Fonts: Authentic Gothic & Harry Potter Book Serifs -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@500;700;900&family=MedievalSharp&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-    <!-- FontAwesome -->
+
+    <!-- FontAwesome 6 Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
@@ -30,8 +44,8 @@
             overflow: hidden;
             font-family: 'Cinzel', serif;
             user-select: none;
-            background: #06090e;
-            color: #e5ded2;
+            background: #04060a;
+            color: #f3ede2;
         }
 
         .font-hp-title {
@@ -54,13 +68,13 @@
 
         /* Authentic Hogwarts Parchment & Aged Bronze Aesthetics */
         .hogwarts-parchment {
-            background: radial-gradient(circle at 50% 20%, rgba(26, 21, 15, 0.96) 0%, rgba(13, 10, 7, 0.98) 100%);
-            border: 1px solid #785a2b;
+            background: radial-gradient(circle at 50% 20%, rgba(28, 22, 16, 0.96) 0%, rgba(12, 9, 6, 0.98) 100%);
+            border: 1px solid #8e6b34;
             box-shadow: 
                 0 0 0 1px #1a140d,
-                0 18px 40px rgba(0, 0, 0, 0.85),
-                inset 0 0 30px rgba(0, 0, 0, 0.7),
-                inset 0 1px 0 rgba(212, 175, 55, 0.25);
+                0 18px 45px rgba(0, 0, 0, 0.92),
+                inset 0 0 35px rgba(0, 0, 0, 0.75),
+                inset 0 1px 0 rgba(225, 185, 75, 0.3);
             position: relative;
         }
 
@@ -68,24 +82,24 @@
             content: '';
             position: absolute;
             inset: 3px;
-            border: 1px solid rgba(198, 155, 58, 0.22);
+            border: 1px solid rgba(212, 175, 55, 0.22);
             pointer-events: none;
             border-radius: inherit;
         }
 
         .bronze-btn {
-            background: linear-gradient(180deg, #332516 0%, #1c130b 100%);
-            border: 1px solid #7a5a29;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.6), inset 0 1px 0 rgba(220, 180, 90, 0.2);
-            transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
-            color: #d8c8a8;
+            background: linear-gradient(180deg, #382918 0%, #1c130b 100%);
+            border: 1px solid #8b6832;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.65), inset 0 1px 0 rgba(235, 195, 100, 0.25);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #e0d0b0;
         }
 
         .bronze-btn:hover {
-            transform: translateY(-1px);
-            border-color: #c49a38;
-            box-shadow: 0 5px 16px rgba(196, 154, 56, 0.3), inset 0 1px 0 rgba(240, 210, 120, 0.35);
-            color: #fcefd2;
+            transform: translateY(-1.5px);
+            border-color: #d8aa42;
+            box-shadow: 0 5px 18px rgba(216, 170, 66, 0.35), inset 0 1px 0 rgba(255, 225, 140, 0.4);
+            color: #fff4dc;
         }
 
         .bronze-btn:active {
@@ -93,9 +107,9 @@
         }
 
         .wax-seal {
-            background: radial-gradient(circle, #7a1515 0%, #450909 75%, #240505 100%);
-            border: 1.5px solid #a82020;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.8), inset 0 1px 3px rgba(255, 120, 120, 0.35);
+            background: radial-gradient(circle, #851717 0%, #4c0a0a 75%, #240505 100%);
+            border: 1.5px solid #b52525;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.85), inset 0 1px 3px rgba(255, 130, 130, 0.4);
         }
 
         .custom-scroll::-webkit-scrollbar {
@@ -105,7 +119,7 @@
             background: rgba(8, 6, 4, 0.4);
         }
         .custom-scroll::-webkit-scrollbar-thumb {
-            background: #5c411c;
+            background: #6d4e22;
             border-radius: 4px;
         }
 
@@ -115,7 +129,33 @@
             inset: 0;
             pointer-events: none;
             z-index: 2;
-            background: radial-gradient(circle at 50% 50%, transparent 45%, rgba(4, 6, 10, 0.55) 85%, rgba(2, 3, 6, 0.85) 100%);
+            background: radial-gradient(circle at 50% 50%, transparent 40%, rgba(3, 5, 8, 0.6) 80%, rgba(1, 2, 4, 0.9) 100%);
+        }
+
+        /* Cinematic Letterbox Bars for Action Camera Attacks */
+        .cinematic-bar {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 0px;
+            background: #020305;
+            z-index: 25;
+            pointer-events: none;
+            transition: height 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .cinematic-bar-top { top: 0; }
+        .cinematic-bar-bottom { bottom: 0; }
+        body.action-cam-active .cinematic-bar {
+            height: 60px;
+        }
+
+        /* Glowing text pulse */
+        @keyframes magicGlow {
+            0%, 100% { text-shadow: 0 0 8px rgba(245, 185, 66, 0.4); }
+            50% { text-shadow: 0 0 20px rgba(245, 185, 66, 0.85), 0 0 30px rgba(255, 215, 100, 0.6); }
+        }
+        .magic-text-glow {
+            animation: magicGlow 2.8s infinite ease-in-out;
         }
     </style>
 </head>
@@ -124,38 +164,73 @@
     <canvas id="webgl-canvas"></canvas>
     <div class="film-vignette"></div>
 
-    <header class="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-5 py-3 pointer-events-none">
+    <!-- Cinematic Action Cam Letterbox Bars -->
+    <div class="cinematic-bar cinematic-bar-top"></div>
+    <div class="cinematic-bar cinematic-bar-bottom"></div>
+
+    <!-- Top Navigation & Header HUD -->
+    <header class="absolute top-0 left-0 right-0 z-20 flex flex-wrap items-center justify-between px-4 md:px-6 py-3 pointer-events-none gap-2">
         <div class="hogwarts-parchment pointer-events-auto rounded-xl px-4 py-2 flex items-center gap-3.5">
-            <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-950 to-stone-950 border border-amber-600/50 flex items-center justify-center text-amber-300 shadow-inner">
-                <i class="fa-solid fa-chess-rook text-base"></i>
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-950 via-stone-900 to-amber-900 border border-amber-500/60 flex items-center justify-center text-amber-300 shadow-inner">
+                <i class="fa-solid fa-chess-knight text-lg"></i>
             </div>
             <div>
                 <h1 class="font-hp-title font-bold text-sm md:text-base tracking-wider text-amber-100 flex items-center gap-2">
-                    Wizard's Chess
-                    <span class="text-[9px] font-sans px-1.5 py-0.5 rounded bg-amber-950/80 border border-amber-700/40 text-amber-300 font-medium uppercase tracking-normal">Chamber of the Stone</span>
+                    <span>Wizard's Chess</span>
+                    <span id="game-mode-badge" class="text-[9px] font-sans px-1.5 py-0.5 rounded bg-amber-950/80 border border-amber-700/50 text-amber-300 font-medium uppercase tracking-normal">Chamber of the Stone</span>
                 </h1>
                 <p id="match-status" class="text-xs text-amber-200/80 tracking-wide flex items-center gap-1.5">
-                    <span class="inline-block w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
-                    Harry's White Marble Move
+                    <span id="turn-dot" class="inline-block w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                    <span id="turn-text">Harry's White Marble Move</span>
                 </p>
             </div>
-            <div id="check-badge" class="hidden px-2.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider bg-rose-950/90 text-rose-300 border border-rose-700 shadow-md animate-pulse">
+            <div id="check-badge" class="hidden px-2.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider bg-rose-950/95 text-rose-300 border border-rose-600 shadow-lg animate-pulse">
                 Check!
             </div>
         </div>
 
-        <nav class="hogwarts-parchment pointer-events-auto rounded-xl p-1.5 flex items-center gap-1.5">
-            <button id="btn-camera" title="Switch Movie Camera Perspective" class="bronze-btn px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-2">
+        <nav class="hogwarts-parchment pointer-events-auto rounded-xl p-1.5 flex flex-wrap items-center gap-1.5">
+            <!-- Camera Preset POV -->
+            <button id="btn-camera" title="Cycle Movie Camera Angle" class="bronze-btn px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-2">
                 <i class="fa-solid fa-clapperboard text-amber-400"></i>
                 <span id="camera-label" class="hidden sm:inline">POV: Ron's Seat</span>
             </button>
+
+            <!-- Opponent Spellcaster -->
             <button id="btn-difficulty" title="Select Opponent Spellcaster" class="bronze-btn px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-2">
                 <i class="fa-solid fa-hat-wizard text-amber-400"></i>
-                <span id="diff-label">AI: Grand Sorcerer</span>
+                <span id="diff-label">AI: McGonagall</span>
             </button>
-            <button id="btn-sound" title="Toggle Chamber Audio & Stone Grinding" class="bronze-btn p-2 w-8 h-8 rounded-lg flex items-center justify-center">
+
+            <!-- Game Mode Selector -->
+            <button id="btn-mode" title="Switch Mode: AI Duel, 2P Duel, Ron's Sacrifice" class="bronze-btn px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-2">
+                <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i>
+                <span id="mode-label" class="hidden md:inline">Mode: Wizard AI</span>
+            </button>
+
+            <!-- Lumos Hint Spell -->
+            <button id="btn-hint" title="Cast Lumos (Show Strategic Hint)" class="bronze-btn px-2.5 py-1.5 rounded-lg text-xs font-medium text-amber-300 hover:text-amber-100 flex items-center gap-1.5">
+                <i class="fa-solid fa-sun text-amber-400"></i>
+                <span class="hidden lg:inline">Lumos</span>
+            </button>
+
+            <!-- Time-Turner Undo -->
+            <button id="btn-undo" title="Turn Back Time (Undo Move)" class="bronze-btn px-2.5 py-1.5 rounded-lg text-xs font-medium text-amber-300 hover:text-amber-100 flex items-center gap-1.5">
+                <i class="fa-solid fa-hourglass-half text-amber-400"></i>
+                <span class="hidden lg:inline">Time-Turner</span>
+            </button>
+
+            <!-- Audio & Soundtrack -->
+            <button id="btn-sound" title="Toggle Chamber Ambiance & Soundtrack" class="bronze-btn p-2 w-8 h-8 rounded-lg flex items-center justify-center">
                 <i id="sound-icon" class="fa-solid fa-volume-high text-amber-400 text-xs"></i>
             </button>
+
+            <!-- Spellbook Guide -->
+            <button id="btn-spellbook" title="Open Wizard Grimoire & Lore" class="bronze-btn p-2 w-8 h-8 rounded-lg flex items-center justify-center">
+                <i class="fa-solid fa-book-skull text-amber-400 text-xs"></i>
+            </button>
+
+            <!-- Restart Duel -->
             <button id="btn-reset" title="Restart Wizard Duel" class="bronze-btn px-2.5 py-1.5 rounded-lg text-xs font-medium text-rose-300 border-rose-900/60 hover:border-rose-700/80 flex items-center gap-1.5">
                 <i class="fa-solid fa-rotate-left"></i>
                 <span class="hidden sm:inline">New Duel</span>
@@ -164,70 +239,186 @@
     </header>
 
     <!-- Movie Quote Banner -->
-    <div id="movie-quote-container" class="absolute top-16 left-0 right-0 z-20 flex justify-center pointer-events-none px-4">
-        <div id="movie-quote-banner" class="opacity-0 transition-opacity duration-700 font-hp-title text-xs md:text-sm text-amber-200 tracking-wide bg-stone-950/90 px-6 py-2 rounded-full border border-amber-600/50 backdrop-blur-md shadow-2xl">
-            "That's wizard's chess."
+    <div id="movie-quote-container" class="absolute top-20 left-0 right-0 z-20 flex justify-center pointer-events-none px-4">
+        <div id="movie-quote-banner" class="opacity-0 transition-opacity duration-700 font-hp-title text-xs md:text-sm text-amber-200 tracking-wider bg-stone-950/95 px-6 py-2.5 rounded-full border border-amber-600/60 backdrop-blur-md shadow-2xl flex items-center gap-2.5">
+            <i class="fa-solid fa-bolt-lightning text-amber-400 text-xs"></i>
+            <span id="movie-quote-text">"That's wizard's chess."</span>
         </div>
     </div>
 
-    <!-- Fallen Armies Side Panel -->
-    <aside class="absolute left-5 bottom-5 z-20 pointer-events-none hidden md:flex flex-col gap-2.5">
+    <!-- Fallen Armies Side Panel (Captured Graveyard) -->
+    <aside class="absolute left-4 md:left-6 bottom-5 z-20 pointer-events-none hidden md:flex flex-col gap-2.5">
         <div class="hogwarts-parchment pointer-events-auto rounded-xl p-3 w-64">
-            <div class="text-[10px] font-semibold tracking-wider uppercase text-amber-300 mb-1 flex items-center justify-between border-b border-amber-900/40 pb-1">
+            <div class="text-[10px] font-semibold tracking-wider uppercase text-amber-300 mb-1 flex items-center justify-between border-b border-amber-900/50 pb-1">
                 <span>Obsidian Fallen</span>
-                <span id="score-w" class="text-amber-200 font-mono font-medium">+0</span>
+                <span id="score-w" class="text-amber-300 font-mono font-medium">+0</span>
             </div>
             <div id="captured-black" class="flex flex-wrap gap-1 min-h-[22px] text-sm text-stone-200"></div>
         </div>
 
         <div class="hogwarts-parchment pointer-events-auto rounded-xl p-3 w-64">
-            <div class="text-[10px] font-semibold tracking-wider uppercase text-amber-300 mb-1 flex items-center justify-between border-b border-amber-900/40 pb-1">
+            <div class="text-[10px] font-semibold tracking-wider uppercase text-amber-300 mb-1 flex items-center justify-between border-b border-amber-900/50 pb-1">
                 <span>White Marble Fallen</span>
                 <span id="score-b" class="text-stone-300 font-mono font-medium">+0</span>
             </div>
-            <div id="captured-white" class="flex flex-wrap gap-1 min-h-[22px] text-sm text-amber-200/75"></div>
+            <div id="captured-white" class="flex flex-wrap gap-1 min-h-[22px] text-sm text-amber-200/80"></div>
         </div>
     </aside>
 
-    <!-- Grimoire Chronicle -->
-    <aside class="absolute right-5 bottom-5 z-20 pointer-events-none flex flex-col items-end gap-2.5">
-        <div class="hogwarts-parchment pointer-events-auto rounded-xl p-3 w-56 sm:w-60">
-            <div class="text-[10px] font-semibold tracking-wider uppercase text-amber-300 mb-1.5 flex items-center justify-between border-b border-amber-900/40 pb-1">
-                <span>Grimoire Chronicle</span>
-                <i class="fa-solid fa-scroll text-amber-400 text-xs"></i>
+    <!-- Grimoire Chronicle (Move History & Lore Log) -->
+    <aside class="absolute right-4 md:right-6 bottom-5 z-20 pointer-events-none flex flex-col items-end gap-2.5">
+        <div class="hogwarts-parchment pointer-events-auto rounded-xl p-3 w-60 sm:w-64">
+            <div class="text-[10px] font-semibold tracking-wider uppercase text-amber-300 mb-1.5 flex items-center justify-between border-b border-amber-900/50 pb-1">
+                <span class="flex items-center gap-1.5">
+                    <i class="fa-solid fa-scroll text-amber-400"></i>
+                    Grimoire Chronicle
+                </span>
+                <span id="action-cam-indicator" class="text-[9px] px-1.5 py-0.2 rounded bg-amber-900/60 text-amber-300 cursor-pointer" title="Click to toggle Action Cam zoom during captures">Action Cam ON</span>
             </div>
-            <div id="move-history" class="custom-scroll max-h-36 overflow-y-auto space-y-1 text-xs text-amber-100 font-mono">
-                <div class="text-amber-300/60 italic font-hp-narrative text-[13px]">The stone sentinels take their stations...</div>
+            <div id="move-history" class="custom-scroll max-h-40 overflow-y-auto space-y-1 text-xs text-amber-100 font-mono">
+                <div class="text-amber-300/60 italic font-hp-narrative text-[13px]">The stone sentinels take their stations in the Chamber...</div>
             </div>
         </div>
     </aside>
 
     <!-- Duel Concluded Modal -->
     <div id="game-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
-        <div class="hogwarts-parchment rounded-2xl p-7 max-w-sm w-full mx-4 text-center border border-amber-600/50 transform scale-95 transition-transform duration-300">
-            <div class="wax-seal w-14 h-14 mx-auto mb-3.5 rounded-full flex items-center justify-center text-amber-200 text-xl">
+        <div class="hogwarts-parchment rounded-2xl p-7 max-w-sm w-full mx-4 text-center border border-amber-500/70 transform scale-95 transition-transform duration-300">
+            <div class="wax-seal w-16 h-16 mx-auto mb-3.5 rounded-full flex items-center justify-center text-amber-200 text-2xl">
                 <i class="fa-solid fa-crown"></i>
             </div>
             <h2 id="modal-title" class="font-hp-title font-bold text-xl text-amber-200 mb-1.5 tracking-wider">Checkmate!</h2>
-            <p id="modal-desc" class="text-xs text-amber-200/80 mb-5 leading-relaxed font-hp-narrative text-[14px]">The Queen has drawn her sword and shattered the royal defense.</p>
-            <div class="italic text-[12px] text-amber-300/80 mb-5 font-hp-narrative">"That's wizard's chess." — Ronald Weasley</div>
-            <button id="modal-btn-restart" class="bronze-btn w-full py-2.5 rounded-xl font-semibold text-xs tracking-wider text-amber-100 border border-amber-500/60 hover:brightness-110 active:scale-95 transition-all shadow-lg">
-                Engage in New Duel
+            <p id="modal-desc" class="text-xs text-amber-200/80 mb-5 leading-relaxed font-hp-narrative text-[15px]">The Queen has drawn her sword and shattered the royal defense.</p>
+            <div id="modal-quote" class="italic text-[13px] text-amber-300/90 mb-6 font-hp-narrative">"That's wizard's chess." — Ronald Weasley</div>
+            <div class="flex flex-col gap-2">
+                <button id="modal-btn-restart" class="bronze-btn w-full py-2.5 rounded-xl font-semibold text-xs tracking-wider text-amber-100 border border-amber-500/60 hover:brightness-110 active:scale-95 transition-all shadow-lg flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-swords"></i>
+                    Engage in New Duel
+                </button>
+                <button id="modal-btn-movie-mode" class="bronze-btn w-full py-2.5 rounded-xl font-semibold text-xs tracking-wider text-amber-300 border border-amber-600/50 hover:brightness-110 active:scale-95 transition-all shadow-lg flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-film"></i>
+                    Play "Ron's Sacrifice" Puzzle
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pawn Promotion Modal -->
+    <div id="promo-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="hogwarts-parchment rounded-2xl p-6 max-w-xs w-full mx-4 text-center border border-amber-500/70">
+            <h3 class="font-hp-title font-bold text-base text-amber-200 mb-1">Pawn Transmutation</h3>
+            <p class="text-xs text-amber-300/70 mb-4 font-hp-narrative text-[13px]">Select the vessel for the sentinel's ascension:</p>
+            <div class="grid grid-cols-2 gap-2.5">
+                <button data-promo="q" class="bronze-btn p-3 rounded-xl flex flex-col items-center gap-1.5 hover:border-amber-400">
+                    <i class="fa-solid fa-chess-queen text-xl text-amber-300"></i>
+                    <span class="text-xs font-semibold">Queen</span>
+                </button>
+                <button data-promo="r" class="bronze-btn p-3 rounded-xl flex flex-col items-center gap-1.5 hover:border-amber-400">
+                    <i class="fa-solid fa-chess-rook text-xl text-amber-300"></i>
+                    <span class="text-xs font-semibold">Rook</span>
+                </button>
+                <button data-promo="b" class="bronze-btn p-3 rounded-xl flex flex-col items-center gap-1.5 hover:border-amber-400">
+                    <i class="fa-solid fa-chess-bishop text-xl text-amber-300"></i>
+                    <span class="text-xs font-semibold">Bishop</span>
+                </button>
+                <button data-promo="n" class="bronze-btn p-3 rounded-xl flex flex-col items-center gap-1.5 hover:border-amber-400">
+                    <i class="fa-solid fa-chess-knight text-xl text-amber-300"></i>
+                    <span class="text-xs font-semibold">Knight</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Spellbook Guide Modal -->
+    <div id="spellbook-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300 p-4">
+        <div class="hogwarts-parchment rounded-2xl p-6 max-w-lg w-full max-h-[85vh] overflow-y-auto custom-scroll border border-amber-500/70 relative">
+            <button id="spellbook-close" class="absolute top-4 right-4 text-amber-400 hover:text-amber-200 text-lg w-8 h-8 rounded-lg flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
             </button>
+            <div class="text-center mb-5">
+                <div class="wax-seal w-12 h-12 mx-auto mb-2 rounded-full flex items-center justify-center text-amber-200 text-lg">
+                    <i class="fa-solid fa-book-sparkles"></i>
+                </div>
+                <h2 class="font-hp-title font-bold text-lg text-amber-200">The Grimoire of Wizard's Chess</h2>
+                <p class="text-xs text-amber-300/70 font-hp-narrative italic">"That's totally barbaric!" — Hermione Granger</p>
+            </div>
+
+            <div class="space-y-4 text-xs text-amber-100/90 leading-relaxed font-hp-narrative text-[14px]">
+                <div class="border-b border-amber-900/40 pb-3">
+                    <h4 class="font-hp-title text-amber-300 text-xs uppercase mb-1">Stone Sentinel Combat</h4>
+                    <p>In Wizard's Chess, pieces are living ancient stone golems. When an enemy piece is captured, the attacker draws their weapon and violently shatters the defender into flying stone rubble and ash!</p>
+                </div>
+
+                <div class="border-b border-amber-900/40 pb-3">
+                    <h4 class="font-hp-title text-amber-300 text-xs uppercase mb-1">Movie Puzzle: "Ron's Sacrifice"</h4>
+                    <p>Recreate the legendary endgame from <em>Harry Potter and the Sorcerer's Stone</em>. Play as Ronald Weasley upon the White Knight to deliver check, lure the Queen away, and allow Harry Potter (White Bishop) to checkmate the Dark King!</p>
+                </div>
+
+                <div class="border-b border-amber-900/40 pb-3">
+                    <h4 class="font-hp-title text-amber-300 text-xs uppercase mb-1">The 4 Wizard AI Opponents</h4>
+                    <ul class="list-disc pl-4 space-y-1 text-amber-200/80">
+                        <li><strong>Ron Weasley (Novice):</strong> Aggressive, bold piece maneuvers, fun and unpredictable.</li>
+                        <li><strong>Hermione Granger (Tactician):</strong> Careful, calculated center pawn protection.</li>
+                        <li><strong>Professor McGonagall (Grandmaster):</strong> Transfiguration master who enchanted the chamber board. Deep Minimax alpha-beta strategy.</li>
+                        <li><strong>Lord Voldemort (Dark Arts):</strong> Ruthless killer searching for rapid king entrapment.</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-hp-title text-amber-300 text-xs uppercase mb-1">Incantations & Controls</h4>
+                    <p><strong>Left Click & Drag:</strong> Rotate Orbit Camera. <strong>Right Click:</strong> Pan. <strong>Scroll:</strong> Zoom.</p>
+                    <p><strong>Click White Piece:</strong> Reveal glowing runic move indicators.</p>
+                    <p><strong>Lumos Spell:</strong> Illuminates the strategically optimal move suggested by your house mentor.</p>
+                    <p><strong>Time-Turner:</strong> Rewinds the timeline by one full turn.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Story Mode / Ron's Sacrifice Banner Dialog -->
+    <div id="story-banner" class="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-30 pointer-events-none hidden max-w-lg w-11/12">
+        <div class="hogwarts-parchment pointer-events-auto rounded-2xl p-4 border border-amber-500/80 shadow-2xl flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full border border-amber-500/60 overflow-hidden flex-shrink-0 bg-stone-900 flex items-center justify-center text-amber-300 text-xl">
+                <i class="fa-solid fa-chess-knight"></i>
+            </div>
+            <div class="flex-1">
+                <div class="flex items-center justify-between mb-0.5">
+                    <h3 id="story-speaker" class="font-hp-title text-xs font-bold text-amber-300">Ronald Weasley</h3>
+                    <span id="story-step-badge" class="text-[9px] px-2 py-0.5 rounded bg-amber-950 border border-amber-700 text-amber-300 font-sans">Step 1/2</span>
+                </div>
+                <p id="story-dialogue" class="text-xs text-amber-100 font-hp-narrative leading-snug">"You understand right, Harry? Once I make my move, the Queen will take me... then you're free to checkmate the King!"</p>
+                <p id="story-instruction" class="text-[11px] text-amber-400 font-bold mt-1 tracking-wide">Objective: Move Knight to H3 to deliver Check!</p>
+            </div>
         </div>
     </div>
 
     <script>
+        /* =========================================================================
+           HARRY POTTER AUDIO & SOUNDTRACK SYNTHESIZER (Pure Web Audio API)
+           Generates haunting celesta arpeggios (Hedwig's Nocturne) + stone grinding,
+           sword clangs, brutal stone explosions, and speech cues without any files.
+           ========================================================================= */
         class HarryPotterSoundEngine {
             constructor() {
                 this.enabled = true;
                 this.ctx = null;
+                this.musicGain = null;
+                this.sfxGain = null;
+                this.isMusicPlaying = false;
+                this.ambientInterval = null;
             }
 
             init() {
                 if (!this.ctx) {
                     const AudioContext = window.AudioContext || window.webkitAudioContext;
                     this.ctx = new AudioContext();
+                    this.musicGain = this.ctx.createGain();
+                    this.musicGain.gain.setValueAtTime(0.18, this.ctx.currentTime);
+                    this.musicGain.connect(this.ctx.destination);
+
+                    this.sfxGain = this.ctx.createGain();
+                    this.sfxGain.gain.setValueAtTime(0.7, this.ctx.currentTime);
+                    this.sfxGain.connect(this.ctx.destination);
                 }
                 if (this.ctx && this.ctx.state === 'suspended') {
                     this.ctx.resume();
@@ -236,36 +427,149 @@
 
             toggle() {
                 this.enabled = !this.enabled;
+                if (!this.enabled && this.isMusicPlaying) {
+                    this.stopSoundtrack();
+                } else if (this.enabled && !this.isMusicPlaying) {
+                    this.startSoundtrack();
+                }
                 return this.enabled;
+            }
+
+            // Haunting celesta note (John Williams / Hedwig style)
+            playCelestaNote(freq, time, duration = 1.2) {
+                if (!this.enabled || !this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, time);
+
+                // Add harmonic overtone
+                const oscHarmonic = this.ctx.createOscillator();
+                const harmGain = this.ctx.createGain();
+                oscHarmonic.type = 'sine';
+                oscHarmonic.frequency.setValueAtTime(freq * 2.02, time);
+
+                gain.gain.setValueAtTime(0.2, time);
+                gain.gain.exponentialRampToValueAtTime(0.001, time + duration);
+
+                harmGain.gain.setValueAtTime(0.08, time);
+                harmGain.gain.exponentialRampToValueAtTime(0.001, time + duration * 0.7);
+
+                osc.connect(gain);
+                oscHarmonic.connect(harmGain);
+                gain.connect(this.musicGain);
+                harmGain.connect(this.musicGain);
+
+                osc.start(time);
+                osc.stop(time + duration);
+                oscHarmonic.start(time);
+                oscHarmonic.stop(time + duration);
+            }
+
+            // Warm cello drone for deep underground chamber ambiance
+            playCelloDrone(freq, time, duration = 6.0) {
+                if (!this.enabled || !this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const filter = this.ctx.createBiquadFilter();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(freq, time);
+
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(180, time);
+
+                gain.gain.setValueAtTime(0.001, time);
+                gain.gain.linearRampToValueAtTime(0.07, time + 1.2);
+                gain.gain.linearRampToValueAtTime(0.001, time + duration);
+
+                osc.connect(filter);
+                filter.connect(gain);
+                gain.connect(this.musicGain);
+
+                osc.start(time);
+                osc.stop(time + duration);
+            }
+
+            startSoundtrack() {
+                if (!this.enabled) return;
+                this.init();
+                this.isMusicPlaying = true;
+
+                // Eerie mystical sequence reminiscent of Hedwig's Chamber Theme (E minor)
+                // Notes: B4, E5, G5, F#5, E5, B5, A5, F#5, E5, G5, F#5, D#5, F5, B4
+                const melody = [
+                    { f: 493.88, d: 0.6 }, // B4
+                    { f: 659.25, d: 0.9 }, // E5
+                    { f: 783.99, d: 0.5 }, // G5
+                    { f: 739.99, d: 0.6 }, // F#5
+                    { f: 659.25, d: 0.9 }, // E5
+                    { f: 987.77, d: 0.6 }, // B5
+                    { f: 880.00, d: 1.2 }, // A5
+                    { f: 739.99, d: 1.2 }, // F#5
+                    { f: 659.25, d: 0.9 }, // E5
+                    { f: 783.99, d: 0.5 }, // G5
+                    { f: 739.99, d: 0.6 }, // F#5
+                    { f: 622.25, d: 0.9 }, // D#5
+                    { f: 698.46, d: 0.8 }, // F5
+                    { f: 493.88, d: 1.4 }  // B4
+                ];
+
+                let step = 0;
+                const scheduleMelody = () => {
+                    if (!this.isMusicPlaying || !this.enabled) return;
+                    const now = this.ctx.currentTime;
+                    const note = melody[step % melody.length];
+                    this.playCelestaNote(note.f, now, 1.8);
+
+                    if (step % 4 === 0) {
+                        const droneFreq = (step % 8 === 0) ? 82.41 : 73.42; // E2 or D2
+                        this.playCelloDrone(droneFreq, now, 5.5);
+                    }
+
+                    step++;
+                    const nextDelay = note.d * 1000 + 400;
+                    this.ambientInterval = setTimeout(scheduleMelody, nextDelay);
+                };
+
+                scheduleMelody();
+            }
+
+            stopSoundtrack() {
+                this.isMusicPlaying = false;
+                if (this.ambientInterval) {
+                    clearTimeout(this.ambientInterval);
+                    this.ambientInterval = null;
+                }
             }
 
             playStoneGrind() {
                 if (!this.enabled) return;
                 this.init();
                 const now = this.ctx.currentTime;
-                const bufferSize = Math.floor(this.ctx.sampleRate * 0.42);
+                const bufferSize = Math.floor(this.ctx.sampleRate * 0.45);
                 const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
                 const data = buffer.getChannelData(0);
                 for (let i = 0; i < bufferSize; i++) {
-                    data[i] = (Math.random() * 2 - 1) * 0.4;
+                    data[i] = (Math.random() * 2 - 1) * 0.45;
                 }
                 const noise = this.ctx.createBufferSource();
                 noise.buffer = buffer;
 
                 const filter = this.ctx.createBiquadFilter();
                 filter.type = 'lowpass';
-                filter.frequency.setValueAtTime(240, now);
-                filter.frequency.exponentialRampToValueAtTime(70, now + 0.42);
+                filter.frequency.setValueAtTime(260, now);
+                filter.frequency.exponentialRampToValueAtTime(60, now + 0.45);
 
                 const gain = this.ctx.createGain();
-                gain.gain.setValueAtTime(0.28, now);
-                gain.gain.linearRampToValueAtTime(0.001, now + 0.42);
+                gain.gain.setValueAtTime(0.35, now);
+                gain.gain.linearRampToValueAtTime(0.001, now + 0.45);
 
                 noise.connect(filter);
                 filter.connect(gain);
-                gain.connect(this.ctx.destination);
+                gain.connect(this.sfxGain);
                 noise.start(now);
-                noise.stop(now + 0.42);
+                noise.stop(now + 0.45);
             }
 
             playBrutalSmash() {
@@ -273,62 +577,74 @@
                 this.init();
                 const now = this.ctx.currentTime;
 
-                // Heavy sub-bass thud (tons of stone smashing)
+                // 1. Heavy sub-bass thud (tons of stone smashing)
                 const sub = this.ctx.createOscillator();
                 const subGain = this.ctx.createGain();
                 sub.type = 'triangle';
-                sub.frequency.setValueAtTime(120, now);
-                sub.frequency.exponentialRampToValueAtTime(22, now + 0.55);
-                subGain.gain.setValueAtTime(0.65, now);
-                subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+                sub.frequency.setValueAtTime(140, now);
+                sub.frequency.exponentialRampToValueAtTime(18, now + 0.65);
+                subGain.gain.setValueAtTime(0.85, now);
+                subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.65);
                 sub.connect(subGain);
-                subGain.connect(this.ctx.destination);
+                subGain.connect(this.sfxGain);
                 sub.start(now);
-                sub.stop(now + 0.55);
+                sub.stop(now + 0.65);
 
-                // Crushing stone explosion noise
-                const bufferSize = Math.floor(this.ctx.sampleRate * 0.6);
+                // 2. High metallic sword impact ring
+                const blade = this.ctx.createOscillator();
+                const bladeGain = this.ctx.createGain();
+                blade.type = 'sawtooth';
+                blade.frequency.setValueAtTime(880, now);
+                blade.frequency.exponentialRampToValueAtTime(220, now + 0.25);
+                bladeGain.gain.setValueAtTime(0.4, now);
+                bladeGain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                blade.connect(bladeGain);
+                bladeGain.connect(this.sfxGain);
+                blade.start(now);
+                blade.stop(now + 0.25);
+
+                // 3. Crushing stone explosion noise
+                const bufferSize = Math.floor(this.ctx.sampleRate * 0.7);
                 const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
                 const data = buffer.getChannelData(0);
                 for (let i = 0; i < bufferSize; i++) {
-                    data[i] = (Math.random() * 2 - 1) * 0.85;
+                    data[i] = (Math.random() * 2 - 1) * 0.9;
                 }
                 const noise = this.ctx.createBufferSource();
                 noise.buffer = buffer;
 
                 const filter = this.ctx.createBiquadFilter();
                 filter.type = 'bandpass';
-                filter.frequency.setValueAtTime(750, now);
-                filter.frequency.exponentialRampToValueAtTime(110, now + 0.6);
+                filter.frequency.setValueAtTime(800, now);
+                filter.frequency.exponentialRampToValueAtTime(90, now + 0.7);
 
                 const noiseGain = this.ctx.createGain();
-                noiseGain.gain.setValueAtTime(0.7, now);
-                noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+                noiseGain.gain.setValueAtTime(0.85, now);
+                noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
 
                 noise.connect(filter);
                 filter.connect(noiseGain);
-                noiseGain.connect(this.ctx.destination);
+                noiseGain.connect(this.sfxGain);
                 noise.start(now);
-                noise.stop(now + 0.6);
+                noise.stop(now + 0.7);
             }
 
             playOminousCheck() {
                 if (!this.enabled) return;
                 this.init();
                 const now = this.ctx.currentTime;
-                // Ominous minor chord swell (G - Bb - D)
-                const freqs = [196.00, 233.08, 293.66];
+                const freqs = [146.83, 174.61, 220.00]; // D minor triad
                 freqs.forEach(f => {
                     const osc = this.ctx.createOscillator();
                     const gain = this.ctx.createGain();
-                    osc.type = 'sine';
+                    osc.type = 'triangle';
                     osc.frequency.setValueAtTime(f, now);
-                    gain.gain.setValueAtTime(0.06, now);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.85);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
                     osc.connect(gain);
-                    gain.connect(this.ctx.destination);
+                    gain.connect(this.sfxGain);
                     osc.start(now);
-                    osc.stop(now + 0.85);
+                    osc.stop(now + 1.2);
                 });
             }
 
@@ -339,20 +655,54 @@
                 const osc = this.ctx.createOscillator();
                 const gain = this.ctx.createGain();
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(420, now);
-                osc.frequency.exponentialRampToValueAtTime(620, now + 0.08);
-                gain.gain.setValueAtTime(0.04, now);
-                gain.gain.linearRampToValueAtTime(0.001, now + 0.08);
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.09); // G5
+                gain.gain.setValueAtTime(0.12, now);
+                gain.gain.linearRampToValueAtTime(0.001, now + 0.09);
                 osc.connect(gain);
-                gain.connect(this.ctx.destination);
+                gain.connect(this.sfxGain);
                 osc.start(now);
-                osc.stop(now + 0.08);
+                osc.stop(now + 0.09);
+            }
+
+            playMagicChime() {
+                if (!this.enabled) return;
+                this.init();
+                const now = this.ctx.currentTime;
+                [659.25, 880.00, 1174.66].forEach((f, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(f, now + i * 0.06);
+                    gain.gain.setValueAtTime(0.12, now + i * 0.06);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.4);
+                    osc.connect(gain);
+                    gain.connect(this.sfxGain);
+                    osc.start(now + i * 0.06);
+                    osc.stop(now + i * 0.06 + 0.4);
+                });
+            }
+
+            speakQuote(text) {
+                if (!this.enabled || !window.speechSynthesis) return;
+                try {
+                    const utter = new SpeechSynthesisUtterance(text);
+                    utter.rate = 0.92;
+                    utter.pitch = 0.95;
+                    const voices = window.speechSynthesis.getVoices();
+                    const britishVoice = voices.find(v => v.lang.includes('en-GB') || v.name.includes('UK') || v.name.includes('British'));
+                    if (britishVoice) utter.voice = britishVoice;
+                    window.speechSynthesis.speak(utter);
+                } catch(e) {}
             }
         }
 
         const soundFX = new HarryPotterSoundEngine();
 
-        let scene, camera, renderer, controls;
+        /* =========================================================================
+           GLOBAL STATE & CONSTANTS
+           ========================================================================= */
+        let scene, camera, renderer, controls, composer;
         let chess = new Chess();
         const piecesMap = new Map();
         const boardTiles = [];
@@ -360,12 +710,16 @@
         const particleSystems = [];
         const torchLights = [];
         const atmosphericEmbers = [];
+        let postProcessingEnabled = true;
 
         let selectedSquare = null;
         let validMoveSquares = [];
         let isAnimating = false;
-        let aiDifficulty = 'archmage';
+        let aiDifficulty = 'mcgonagall'; // ron, hermione, mcgonagall, voldemort
+        let gameMode = 'ai'; // 'ai', 'duel_2p', 'movie_puzzle'
         let cameraModeIndex = 0;
+        let actionCamEnabled = true;
+        let currentHintSquares = [];
 
         const SQUARE_SIZE = 1.7;
         const BOARD_OFFSET = (7 * SQUARE_SIZE) / 2;
@@ -383,17 +737,19 @@
             "\"That's wizard's chess.\" — Ron Weasley",
             "\"Wait a minute... you understand right, Harry? Once I make my move, the Queen will take me.\"",
             "\"Not me, not Hermione... YOU!\" — Ron",
+            "\"Knight to H3... Check!\"",
+            "\"The white Queen draws her sword!\"",
             "\"Check.\"",
-            "\"Knight to H3!\"",
-            "\"Castle kingside!\"",
-            "\"The white queen draws her sword!\""
+            "\"The stone sentinels clash!\""
         ];
 
         let marbleMat, obsidianMat, tileLightMat, tileDarkMat, highlightMoveMat, highlightCaptureMat;
         let marbleTexture, obsidianTexture, weaponMetalMat, goldTrimMat;
         let frameMetalMat, rubyMat, cornerDomeMat, borderCheckMat;
 
-        // Procedural film-accurate stone & marble generation (ancient weathered limestone vs dark serpentine slate)
+        /* =========================================================================
+           PROCEDURAL TEXTURE GENERATION (Aged Limestone Marble & Basalt Obsidian)
+           ========================================================================= */
         function createProceduralNoiseCanvas(width, height, type) {
             const canvas = document.createElement('canvas');
             canvas.width = width;
@@ -401,40 +757,33 @@
             const ctx = canvas.getContext('2d');
 
             if (type === 'ancient-marble') {
-                // Weathered, aged alabaster/limestone with grey-brown cracks and patina
                 ctx.fillStyle = '#dfd6c5';
                 ctx.fillRect(0, 0, width, height);
 
-                // Deep primary fractures
-                for (let i = 0; i < 35; i++) {
+                // Deep veined fractures
+                for (let i = 0; i < 45; i++) {
                     ctx.beginPath();
                     let x = Math.random() * width;
                     let y = Math.random() * height;
                     ctx.moveTo(x, y);
-                    for (let step = 0; step < 7; step++) {
-                        x += (Math.random() - 0.5) * 65;
-                        y += (Math.random() - 0.5) * 65;
+                    for (let step = 0; step < 8; step++) {
+                        x += (Math.random() - 0.5) * 70;
+                        y += (Math.random() - 0.5) * 70;
                         ctx.lineTo(x, y);
                     }
-                    ctx.strokeStyle = Math.random() > 0.5
-                        ? 'rgba(125, 108, 88, 0.35)' 
-                        : 'rgba(165, 148, 125, 0.28)';
-                    ctx.lineWidth = Math.random() * 2.2 + 0.8;
+                    ctx.strokeStyle = Math.random() > 0.5 ? 'rgba(120, 102, 82, 0.4)' : 'rgba(165, 145, 120, 0.3)';
+                    ctx.lineWidth = Math.random() * 2.5 + 0.8;
                     ctx.stroke();
                 }
 
-                // Fine hairline chisel veins
-                for (let i = 0; i < 25; i++) {
+                // Fine chisel scratches
+                for (let i = 0; i < 30; i++) {
                     ctx.beginPath();
                     let x = Math.random() * width;
                     let y = Math.random() * height;
                     ctx.moveTo(x, y);
-                    for (let step = 0; step < 5; step++) {
-                        x += (Math.random() - 0.5) * 45;
-                        y += (Math.random() - 0.5) * 45;
-                        ctx.lineTo(x, y);
-                    }
-                    ctx.strokeStyle = 'rgba(95, 80, 65, 0.25)';
+                    ctx.lineTo(x + (Math.random() - 0.5) * 40, y + (Math.random() - 0.5) * 40);
+                    ctx.strokeStyle = 'rgba(90, 75, 60, 0.25)';
                     ctx.lineWidth = 0.8;
                     ctx.stroke();
                 }
@@ -442,7 +791,7 @@
                 const imgData = ctx.getImageData(0, 0, width, height);
                 const d = imgData.data;
                 for (let i = 0; i < d.length; i += 4) {
-                    const noise = (Math.random() - 0.5) * 12;
+                    const noise = (Math.random() - 0.5) * 14;
                     d[i] = Math.min(255, Math.max(0, d[i] + noise));
                     d[i + 1] = Math.min(255, Math.max(0, d[i + 1] + noise));
                     d[i + 2] = Math.min(255, Math.max(0, d[i + 2] + noise));
@@ -450,11 +799,10 @@
                 ctx.putImageData(imgData, 0, 0);
 
             } else if (type === 'noble-dark-tile') {
-                // Noble Collection deep emerald-charcoal serpentine marble
-                ctx.fillStyle = '#101c1e';
+                ctx.fillStyle = '#0f1718';
                 ctx.fillRect(0, 0, width, height);
 
-                for (let i = 0; i < 40; i++) {
+                for (let i = 0; i < 45; i++) {
                     ctx.beginPath();
                     let x = Math.random() * width;
                     let y = Math.random() * height;
@@ -464,41 +812,37 @@
                         y += (Math.random() - 0.5) * 60;
                         ctx.lineTo(x, y);
                     }
-                    ctx.strokeStyle = Math.random() > 0.4
-                        ? 'rgba(45, 95, 92, 0.38)'
-                        : 'rgba(75, 125, 118, 0.28)';
+                    ctx.strokeStyle = Math.random() > 0.4 ? 'rgba(40, 85, 80, 0.45)' : 'rgba(65, 115, 110, 0.3)';
                     ctx.lineWidth = Math.random() * 2.2 + 0.8;
                     ctx.stroke();
                 }
 
             } else if (type === 'ancient-obsidian') {
-                // Weathered dark slate and forged iron with metallic edge patina
-                ctx.fillStyle = '#1c2026';
+                ctx.fillStyle = '#181b22';
                 ctx.fillRect(0, 0, width, height);
 
-                for (let i = 0; i < 40; i++) {
+                for (let i = 0; i < 50; i++) {
                     ctx.beginPath();
                     let x = Math.random() * width;
                     let y = Math.random() * height;
                     ctx.moveTo(x, y);
                     for (let step = 0; step < 6; step++) {
-                        x += (Math.random() - 0.5) * 50;
-                        y += (Math.random() - 0.5) * 50;
+                        x += (Math.random() - 0.5) * 55;
+                        y += (Math.random() - 0.5) * 55;
                         ctx.lineTo(x, y);
                     }
-                    ctx.strokeStyle = 'rgba(115, 130, 150, 0.3)';
-                    ctx.lineWidth = Math.random() * 1.8 + 0.6;
+                    ctx.strokeStyle = 'rgba(110, 125, 145, 0.35)';
+                    ctx.lineWidth = Math.random() * 2.0 + 0.6;
                     ctx.stroke();
                 }
 
             } else if (type === 'diagonal-border') {
-                // Noble Collection diagonal alternating pewter and ivory track
-                ctx.fillStyle = '#14171d';
+                ctx.fillStyle = '#12141a';
                 ctx.fillRect(0, 0, width, height);
-                const segs = 24;
+                const segs = 28;
                 const segW = width / segs;
                 for (let i = 0; i < segs; i++) {
-                    ctx.fillStyle = (i % 2 === 0) ? '#c8beaa' : '#222730';
+                    ctx.fillStyle = (i % 2 === 0) ? '#cfc4b0' : '#1f242c';
                     ctx.fillRect(i * segW + 2, 4, segW - 4, height - 8);
                 }
             }
@@ -515,208 +859,185 @@
             obsidianTexture = createProceduralNoiseCanvas(512, 512, 'ancient-obsidian');
             const borderTrackTex = createProceduralNoiseCanvas(512, 64, 'diagonal-border');
 
-            // Film-authentic aged ivory stone
+            // Film-authentic aged alabaster limestone
             marbleMat = new THREE.MeshStandardMaterial({
                 map: marbleTexture,
                 bumpMap: marbleTexture,
-                bumpScale: 0.045,
-                roughness: 0.56,
+                bumpScale: 0.05,
+                roughness: 0.52,
                 metalness: 0.08,
-                color: 0xe5dcce
+                color: 0xe8dfd2
             });
 
-            // Film-authentic blackened iron and weathered charcoal slate
+            // Film-authentic blackened iron and weathered obsidian slate
             obsidianMat = new THREE.MeshStandardMaterial({
                 map: obsidianTexture,
                 bumpMap: obsidianTexture,
-                bumpScale: 0.04,
-                roughness: 0.46,
-                metalness: 0.42,
-                color: 0x22262d
+                bumpScale: 0.045,
+                roughness: 0.44,
+                metalness: 0.45,
+                color: 0x1f232b
             });
 
-            // Worn weapon steel
             weaponMetalMat = new THREE.MeshStandardMaterial({
-                color: 0x76808e,
-                roughness: 0.45,
+                color: 0x7c8796,
+                roughness: 0.4,
+                metalness: 0.75
+            });
+
+            goldTrimMat = new THREE.MeshStandardMaterial({
+                color: 0xd4a838,
+                roughness: 0.38,
                 metalness: 0.7
             });
 
-            // Antique brass/gold trim
-            goldTrimMat = new THREE.MeshStandardMaterial({
-                color: 0xc49e3c,
-                roughness: 0.42,
-                metalness: 0.65
-            });
-
             frameMetalMat = new THREE.MeshStandardMaterial({
-                color: 0x1b1f28,
-                roughness: 0.58,
-                metalness: 0.45
+                color: 0x181c24,
+                roughness: 0.6,
+                metalness: 0.5
             });
 
             cornerDomeMat = new THREE.MeshStandardMaterial({
-                color: 0xa8b4c2,
-                roughness: 0.28,
-                metalness: 0.85
+                color: 0xb0bccb,
+                roughness: 0.25,
+                metalness: 0.88
             });
 
-            // Deep ruby cabochon gems
             rubyMat = new THREE.MeshStandardMaterial({
-                color: 0x8a101f,
-                roughness: 0.32,
+                color: 0x9b1122,
+                roughness: 0.28,
                 metalness: 0.2,
-                emissive: 0x48080f,
-                emissiveIntensity: 0.3
+                emissive: 0x580812,
+                emissiveIntensity: 0.4
             });
 
             borderCheckMat = new THREE.MeshStandardMaterial({
                 map: borderTrackTex,
-                roughness: 0.52,
+                roughness: 0.5,
                 metalness: 0.35
             });
 
-            // The Two Board Stone Types from the Film
             tileLightMat = new THREE.MeshStandardMaterial({
                 map: marbleTexture,
                 bumpMap: marbleTexture,
-                bumpScale: 0.03,
-                roughness: 0.42,
+                bumpScale: 0.035,
+                roughness: 0.38,
                 metalness: 0.08,
-                color: 0xeae2d4
+                color: 0xede6d8
             });
 
             tileDarkMat = new THREE.MeshStandardMaterial({
                 map: darkTileTexture,
                 bumpMap: darkTileTexture,
-                bumpScale: 0.032,
-                roughness: 0.45,
-                metalness: 0.18,
-                color: 0x172426
+                bumpScale: 0.035,
+                roughness: 0.42,
+                metalness: 0.2,
+                color: 0x152224
             });
 
-            // Subtle mystical amber and crimson stone rune selection rings
+            // Glowing Rune Selection Markers
             highlightMoveMat = new THREE.MeshBasicMaterial({
-                color: 0xdca23a,
+                color: 0xf5b338,
                 transparent: true,
-                opacity: 0.6
+                opacity: 0.75
             });
 
             highlightCaptureMat = new THREE.MeshBasicMaterial({
-                color: 0xc93434,
+                color: 0xee2c2c,
                 transparent: true,
-                opacity: 0.7
+                opacity: 0.85
             });
         }
 
+        /* =========================================================================
+           CINEMATIC LIGHTING & UNDERGROUND CHAMBER ENVIRONMENT
+           ========================================================================= */
         function setupChamberLighting() {
-            // Stuart Craig Cinematic Dungeon Atmosphere: Slate-blue ambient shadows + warm torch bounce
-            const ambient = new THREE.HemisphereLight(0x7896bc, 0x1f1610, 1.25);
+            const ambient = new THREE.HemisphereLight(0x7fa1ca, 0x221812, 1.3);
             scene.add(ambient);
 
-            // Cold, dramatic moonlight beam cutting across the hall
-            const moonKey = new THREE.SpotLight(0xaad0f8, 1.85, 95, Math.PI / 3.4, 0.65, 1.2);
-            moonKey.position.set(-6, 28, -6);
+            // Cold cinematic moonlight beam cutting through ceiling arches
+            const moonKey = new THREE.SpotLight(0xb4d8ff, 2.2, 110, Math.PI / 3.2, 0.65, 1.2);
+            moonKey.position.set(-6, 32, -6);
             moonKey.castShadow = true;
-            moonKey.shadow.mapSize.width = 1024;
-            moonKey.shadow.mapSize.height = 1024;
+            moonKey.shadow.mapSize.width = 2048;
+            moonKey.shadow.mapSize.height = 2048;
             moonKey.shadow.camera.near = 5;
-            moonKey.shadow.camera.far = 55;
-            moonKey.shadow.bias = -0.0002;
+            moonKey.shadow.camera.far = 65;
+            moonKey.shadow.bias = -0.00015;
             scene.add(moonKey);
 
-            // Cool rim light for sculpting silhouettes of dark pieces
-            const rimLightBack = new THREE.DirectionalLight(0x5c7e9f, 0.95);
-            rimLightBack.position.set(0, 16, -24);
+            // Cool rim light for sculpting obsidian pieces
+            const rimLightBack = new THREE.DirectionalLight(0x648bb2, 1.05);
+            rimLightBack.position.set(0, 18, -26);
             scene.add(rimLightBack);
 
-            // Warm front torch bounce fill
-            const rimLightFront = new THREE.DirectionalLight(0xb88849, 0.65);
-            rimLightFront.position.set(0, 12, 22);
+            // Warm torch bounce fill
+            const rimLightFront = new THREE.DirectionalLight(0xc99652, 0.75);
+            rimLightFront.position.set(0, 14, 24);
             scene.add(rimLightFront);
 
-            // 4 Dais Stone Braziers
+            // 4 Dais Braziers
             const brazierCorners = [
                 [-9.8, -9.8], [9.8, -9.8], [-9.8, 9.8], [9.8, 9.8]
             ];
-
             brazierCorners.forEach(([bx, bz]) => {
-                const torchLight = new THREE.PointLight(0xf28b28, 1.45, 24, 1.7);
-                torchLight.position.set(bx, 3.6, bz);
+                const torchLight = new THREE.PointLight(0xf5922c, 1.6, 26, 1.7);
+                torchLight.position.set(bx, 3.8, bz);
                 scene.add(torchLight);
-                torchLights.push({ light: torchLight, baseInt: 1.45, seed: Math.random() * 50 });
+                torchLights.push({ light: torchLight, baseInt: 1.6, seed: Math.random() * 50 });
             });
 
             // Perimeter Wall Torch Sconces
             const wallTorches = [
-                [-21, 5.2, -12], [-21, 5.2, 12],
-                [21, 5.2, -12], [21, 5.2, 12],
-                [-10, 5.2, -25], [10, 5.2, -25]
+                [-22, 5.5, -12], [-22, 5.5, 12],
+                [22, 5.5, -12], [22, 5.5, 12],
+                [-10, 5.5, -26], [10, 5.5, -26]
             ];
             wallTorches.forEach(([wx, wy, wz]) => {
-                const wLight = new THREE.PointLight(0xe87a22, 0.85, 16, 2.0);
+                const wLight = new THREE.PointLight(0xf08022, 0.95, 18, 2.0);
                 wLight.position.set(wx, wy, wz);
                 scene.add(wLight);
-                torchLights.push({ light: wLight, baseInt: 0.85, seed: Math.random() * 100 });
+                torchLights.push({ light: wLight, baseInt: 0.95, seed: Math.random() * 100 });
             });
         }
 
         function buildUndergroundChamber() {
-            // Chamber Flagstone Floor with aged stone tiles
+            const stoneMat = new THREE.MeshStandardMaterial({ color: 0x13171e, roughness: 0.9, metalness: 0.15 });
+            const stoneTrimMat = new THREE.MeshStandardMaterial({ color: 0x222a36, roughness: 0.75, metalness: 0.25 });
+            const ironMat = new THREE.MeshStandardMaterial({ color: 0x101216, roughness: 0.6, metalness: 0.7 });
+
+            // Ground Flagstone Floor
             const floorGeo = new THREE.PlaneGeometry(160, 160);
-            const floorMat = new THREE.MeshStandardMaterial({
-                color: 0x0c0f15,
-                roughness: 0.92,
-                metalness: 0.12
-            });
+            const floorMat = new THREE.MeshStandardMaterial({ color: 0x0a0c10, roughness: 0.94, metalness: 0.1 });
             const floor = new THREE.Mesh(floorGeo, floorMat);
             floor.rotation.x = -Math.PI / 2;
             floor.position.y = -1.4;
             floor.receiveShadow = true;
             scene.add(floor);
 
-            const stoneMat = new THREE.MeshStandardMaterial({
-                color: 0x151a22,
-                roughness: 0.9,
-                metalness: 0.15
-            });
-
-            const stoneTrimMat = new THREE.MeshStandardMaterial({
-                color: 0x222a36,
-                roughness: 0.75,
-                metalness: 0.25
-            });
-
-            const ironMat = new THREE.MeshStandardMaterial({
-                color: 0x111317,
-                roughness: 0.6,
-                metalness: 0.65
-            });
-
             // Perimeter Stone Walls with Gothic Arched Wall-Bays
-            const wallHeight = 36;
-            const wallDist = 32;
+            const wallHeight = 38;
+            const wallDist = 34;
 
-            // North, South, East, West enclosing structure
-            const northWall = new THREE.Mesh(new THREE.BoxGeometry(64, wallHeight, 2.5), stoneMat);
+            const northWall = new THREE.Mesh(new THREE.BoxGeometry(68, wallHeight, 2.5), stoneMat);
             northWall.position.set(0, wallHeight / 2 - 1.4, -wallDist);
             northWall.receiveShadow = true;
-            scene.add(northWall);
 
-            const eastWall = new THREE.Mesh(new THREE.BoxGeometry(2.5, wallHeight, 64), stoneMat);
+            const eastWall = new THREE.Mesh(new THREE.BoxGeometry(2.5, wallHeight, 68), stoneMat);
             eastWall.position.set(wallDist, wallHeight / 2 - 1.4, 0);
             eastWall.receiveShadow = true;
-            scene.add(eastWall);
 
-            const westWall = new THREE.Mesh(new THREE.BoxGeometry(2.5, wallHeight, 64), stoneMat);
+            const westWall = new THREE.Mesh(new THREE.BoxGeometry(2.5, wallHeight, 68), stoneMat);
             westWall.position.set(-wallDist, wallHeight / 2 - 1.4, 0);
             westWall.receiveShadow = true;
-            scene.add(westWall);
 
-            // Recessed Gothic wall bays with double pointed arches along the flanks
+            scene.add(northWall, eastWall, westWall);
+
+            // Recessed Gothic wall bays with double pointed arches
             [-18, 0, 18].forEach(pz => {
                 [-wallDist + 0.9, wallDist - 0.9].forEach(wx => {
-                    const archNiche = new THREE.Mesh(new THREE.TorusGeometry(3.6, 0.5, 8, 16, Math.PI), stoneTrimMat);
+                    const archNiche = new THREE.Mesh(new THREE.TorusGeometry(3.8, 0.5, 8, 16, Math.PI), stoneTrimMat);
                     archNiche.position.set(wx, 12, pz);
                     archNiche.rotation.y = wx > 0 ? -Math.PI / 2 : Math.PI / 2;
                     scene.add(archNiche);
@@ -724,16 +1045,16 @@
                     // Sconce iron bracket holding torch
                     const bracket = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.45, 1.2), ironMat);
                     bracket.position.set(wx > 0 ? wx - 0.6 : wx + 0.6, 5.2, pz);
-                    const cup = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.12, 0.35, 8), ironMat);
+                    const cup = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.14, 0.35, 8), ironMat);
                     cup.position.set(wx > 0 ? wx - 1.1 : wx + 1.1, 5.4, pz);
-                    const flame = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.6, 6), new THREE.MeshBasicMaterial({ color: 0xf58a28 }));
-                    flame.position.set(wx > 0 ? wx - 1.1 : wx + 1.1, 5.8, pz);
+                    const flame = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.65, 6), new THREE.MeshBasicMaterial({ color: 0xfca035 }));
+                    flame.position.set(wx > 0 ? wx - 1.1 : wx + 1.1, 5.85, pz);
                     scene.add(bracket, cup, flame);
                 });
             });
 
-            // Colossal Vaulted Columns & Quadripartite Groined Ceiling Ribs
-            const colGeo = new THREE.CylinderGeometry(1.1, 1.55, 34, 16);
+            // Vaulted Columns & Quadripartite Groined Ceiling Ribs
+            const colGeo = new THREE.CylinderGeometry(1.2, 1.6, 36, 16);
             const pillarPositions = [
                 [-22, -22], [22, -22], [-22, 22], [22, 22],
                 [-22, 0], [22, 0], [0, -28], [0, 28]
@@ -741,371 +1062,82 @@
 
             pillarPositions.forEach(([px, pz]) => {
                 const pillar = new THREE.Mesh(colGeo, stoneMat);
-                pillar.position.set(px, 15, pz);
+                pillar.position.set(px, 16, pz);
                 pillar.receiveShadow = true;
                 scene.add(pillar);
 
-                // Multi-tiered stepped column plinth
-                const base = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.7, 2.6, 8), stoneMat);
+                const base = new THREE.Mesh(new THREE.CylinderGeometry(2.3, 2.8, 2.6, 8), stoneMat);
                 base.position.set(px, -0.1, pz);
-                base.receiveShadow = true;
                 scene.add(base);
 
-                // Carved column capital
-                const capital = new THREE.Mesh(new THREE.CylinderGeometry(2.1, 1.2, 1.6, 8), stoneTrimMat);
-                capital.position.set(px, 31, pz);
+                const capital = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 1.3, 1.6, 8), stoneTrimMat);
+                capital.position.set(px, 33, pz);
                 scene.add(capital);
 
-                // Diagonal and transverse Gothic vault ribs arching toward center
-                const archGeo = new THREE.TorusGeometry(16, 0.42, 8, 24, Math.PI / 2.1);
+                const archGeo = new THREE.TorusGeometry(17, 0.45, 8, 24, Math.PI / 2.1);
                 const rib = new THREE.Mesh(archGeo, stoneTrimMat);
-                rib.position.set(px * 0.45, 29, pz * 0.45);
+                rib.position.set(px * 0.45, 30.5, pz * 0.45);
                 rib.rotation.y = Math.atan2(-px, -pz);
                 rib.rotation.z = Math.PI / 4.4;
                 scene.add(rib);
             });
 
-            // Center Vault Keystones with carved stone boss ornaments
-            [[-8, -8], [8, -8], [-8, 8], [8, 8], [0, 0]].forEach(([kx, kz]) => {
-                const boss = new THREE.Mesh(new THREE.DodecahedronGeometry(0.85), stoneTrimMat);
-                boss.position.set(kx, 34.5, kz);
-                scene.add(boss);
-            });
-
-            // The Iconic Movie Entrance Portal (South wall where Harry, Ron & Hermione enter)
-            const portalZ = 29.5;
-            const portalFrame = new THREE.Mesh(new THREE.TorusGeometry(5.2, 1.2, 10, 20, Math.PI), stoneTrimMat);
-            portalFrame.position.set(0, 10, portalZ);
-            scene.add(portalFrame);
-
-            const portalPillars = [
-                [-5.4, 5, portalZ], [5.4, 5, portalZ]
-            ];
-            portalPillars.forEach(([px, py, pz]) => {
-                const pMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 1.1, 12, 10), stoneMat);
-                pMesh.position.set(px, py, pz);
-                scene.add(pMesh);
-            });
-
-            // Descending entrance stone steps
-            for (let s = 0; s < 7; s++) {
-                const step = new THREE.Mesh(
-                    new THREE.BoxGeometry(11.5 - s * 0.35, 0.36, 1.6),
-                    stoneMat
-                );
-                step.position.set(0, -1.2 + s * 0.36, portalZ - s * 1.3);
-                step.receiveShadow = true;
-                scene.add(step);
-            }
-
-            // Heavy arched oak doors bound with wrought-iron bands (standing ajar)
-            const doorGeo = new THREE.BoxGeometry(2.3, 8.5, 0.4);
-            const doorMat = new THREE.MeshStandardMaterial({ color: 0x1a120a, roughness: 0.85, metalness: 0.2 });
-            const leftDoor = new THREE.Mesh(doorGeo, doorMat);
-            leftDoor.position.set(-2.8, 5.2, portalZ + 0.3);
-            leftDoor.rotation.y = 0.55; // slightly open
-            const rightDoor = new THREE.Mesh(doorGeo, doorMat);
-            rightDoor.position.set(2.8, 5.2, portalZ + 0.3);
-            rightDoor.rotation.y = -0.55;
-            scene.add(leftDoor, rightDoor);
-
-            // Cold blue mystical threshold glow beyond the open entrance
-            const doorwayGlow = new THREE.PointLight(0x4a7eb5, 1.6, 18, 1.5);
-            doorwayGlow.position.set(0, 6, portalZ + 3.5);
-            scene.add(doorwayGlow);
-
             // Monumental Guardian Statues lining the chamber perimeter
             const statuePos = [
-                { pos: [-24, 0, -11], rot: Math.PI / 2.3 },
-                { pos: [24, 0, -11], rot: -Math.PI / 2.3 },
-                { pos: [-24, 0, 11], rot: Math.PI / 2.1 },
-                { pos: [24, 0, 11], rot: -Math.PI / 2.1 },
-                { pos: [-14, 0, -27], rot: 0.15 },
-                { pos: [14, 0, -27], rot: -0.15 }
+                { pos: [-25, 0, -11], rot: Math.PI / 2.3 },
+                { pos: [25, 0, -11], rot: -Math.PI / 2.3 },
+                { pos: [-25, 0, 11], rot: Math.PI / 2.1 },
+                { pos: [25, 0, 11], rot: -Math.PI / 2.1 },
+                { pos: [-15, 0, -28], rot: 0.15 },
+                { pos: [15, 0, -28], rot: -0.15 }
             ];
 
             statuePos.forEach(sData => {
                 const sg = new THREE.Group();
-
-                // Relief Carved Pedestal
                 const pedBase = new THREE.Mesh(new THREE.BoxGeometry(3.6, 2.2, 3.6), stoneTrimMat);
                 pedBase.position.y = 0.9;
-                pedBase.receiveShadow = true;
                 sg.add(pedBase);
 
-                // Robed body of the stone wizard/knight sentinel
                 const robe = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.9, 8.5, 10), stoneMat);
                 robe.position.y = 6.2;
-                robe.castShadow = true;
 
-                // Hooded cowl and weathered face cavity
                 const cowl = new THREE.Mesh(new THREE.SphereGeometry(1.35, 12, 12), stoneMat);
                 cowl.position.y = 11.2;
                 cowl.scale.set(0.9, 1.15, 0.95);
-                const cowlShadow = new THREE.Mesh(new THREE.SphereGeometry(0.75, 8, 8), new THREE.MeshBasicMaterial({ color: 0x05070a }));
-                cowlShadow.position.set(0, 11.1, 0.55);
 
-                // Heavy stone shoulder pauldrons
-                [-1.5, 1.5].forEach(sx => {
-                    const sp = new THREE.Mesh(new THREE.SphereGeometry(0.65, 8, 8), stoneMat);
-                    sp.position.set(sx, 10.1, 0);
-                    sg.add(sp);
-                });
-
-                // Monumental two-handed Broadsword plunged point-down into the plinth
-                const swordBlade = new THREE.Mesh(new THREE.BoxGeometry(0.25, 9.2, 0.08), ironMat);
+                const swordBlade = new THREE.Mesh(new THREE.BoxGeometry(0.28, 9.5, 0.08), ironMat);
                 swordBlade.position.set(0, 6.2, 1.35);
-                const swordGuard = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.28, 0.28), ironMat);
+                const swordGuard = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.3, 0.3), ironMat);
                 swordGuard.position.set(0, 10.6, 1.35);
-                const swordPommel = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 8), ironMat);
-                swordPommel.position.set(0, 11.8, 1.35);
 
-                // Hands clasping the hilt
-                const hands = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.6, 0.6), stoneMat);
-                hands.position.set(0, 11.2, 1.35);
-
-                sg.add(robe, cowl, cowlShadow, swordBlade, swordGuard, swordPommel, hands);
+                sg.add(robe, cowl, swordBlade, swordGuard);
                 sg.position.set(sData.pos[0], -0.2, sData.pos[2]);
                 sg.rotation.y = sData.rot;
                 scene.add(sg);
             });
 
-            // Ancient Battlefield Ruins: Fallen Columns & Cracked Masonry
-            const ruins = [
-                // Fallen shattered column drums
-                { type: 'col', pos: [-14.5, -0.6, -15.5], rot: [Math.PI / 2, 0.4, 0.8], r: 1.1, h: 4.5 },
-                { type: 'col', pos: [-16.8, -0.7, -13.2], rot: [Math.PI / 2, 0.1, 1.3], r: 0.95, h: 3.2 },
-                { type: 'col', pos: [15.2, -0.6, 14.8], rot: [Math.PI / 2, -0.3, -0.6], r: 1.05, h: 4.2 },
-                { type: 'col', pos: [17.5, -0.7, 16.5], rot: [Math.PI / 2, 0.2, -0.2], r: 0.9, h: 2.8 },
-                // Large chipped flagstone slabs & blocks
-                { type: 'block', pos: [-13.2, -0.8, 14.2], size: [2.8, 0.8, 1.8], rot: 0.35 },
-                { type: 'block', pos: [-15.5, -0.9, 15.5], size: [2.1, 0.6, 2.2], rot: -0.45 },
-                { type: 'block', pos: [14.0, -0.8, -14.2], size: [2.6, 0.7, 1.9], rot: -0.25 },
-                { type: 'block', pos: [16.2, -0.9, -15.8], size: [1.8, 0.5, 1.8], rot: 0.6 },
-                { type: 'block', pos: [0, -0.9, -18.5], size: [3.4, 0.6, 2.1], rot: 0.12 }
-            ];
-
-            ruins.forEach(r => {
-                if (r.type === 'col') {
-                    const cMesh = new THREE.Mesh(new THREE.CylinderGeometry(r.r, r.r * 1.05, r.h, 12), stoneMat);
-                    cMesh.position.set(r.pos[0], r.pos[1], r.pos[2]);
-                    cMesh.rotation.set(r.rot[0], r.rot[1], r.rot[2]);
-                    cMesh.receiveShadow = true;
-                    scene.add(cMesh);
-                } else {
-                    const bMesh = new THREE.Mesh(new THREE.BoxGeometry(r.size[0], r.size[1], r.size[2]), stoneMat);
-                    bMesh.position.set(r.pos[0], r.pos[1], r.pos[2]);
-                    bMesh.rotation.y = r.rot;
-                    bMesh.receiveShadow = true;
-                    scene.add(bMesh);
-                }
-            });
-
-            // Small scattered rubble rocks around perimeter
-            for (let i = 0; i < 28; i++) {
-                const angle = Math.random() * Math.PI * 2;
-                const dist = Math.random() * 12 + 13.5;
-                const rock = new THREE.Mesh(
-                    new THREE.DodecahedronGeometry(Math.random() * 0.35 + 0.15),
-                    stoneMat
-                );
-                rock.position.set(Math.cos(angle) * dist, -1.2, Math.sin(angle) * dist);
-                rock.rotation.set(Math.random() * 3, Math.random() * 3, Math.random() * 3);
-                rock.receiveShadow = true;
-                scene.add(rock);
-            }
-
-            // Monumental Gothic Rose Window high on the North Wall
-            const roseZ = -wallDist + 1.2;
-            const roseY = 22;
-            const roseOuterRing = new THREE.Mesh(new THREE.TorusGeometry(5.8, 0.65, 10, 36), stoneTrimMat);
-            roseOuterRing.position.set(0, roseY, roseZ);
-            const roseInnerRing = new THREE.Mesh(new THREE.TorusGeometry(2.6, 0.4, 8, 28), stoneTrimMat);
-            roseInnerRing.position.set(0, roseY, roseZ);
-            scene.add(roseOuterRing, roseInnerRing);
-
-            // Carved stone radial tracery spokes
-            for (let sp = 0; sp < 12; sp++) {
-                const spoke = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.15, 5.4, 6), stoneTrimMat);
-                spoke.position.set(0, roseY, roseZ);
-                spoke.rotation.z = (sp * Math.PI) / 6;
-                scene.add(spoke);
-            }
-
-            // Backlit moonlit glass glow behind the rose window
-            const roseBackdrop = new THREE.Mesh(
-                new THREE.CircleGeometry(5.2, 24),
-                new THREE.MeshBasicMaterial({ color: 0x82b2e8, transparent: true, opacity: 0.38, side: THREE.DoubleSide })
-            );
-            roseBackdrop.position.set(0, roseY, roseZ - 0.2);
-            scene.add(roseBackdrop);
-
-            // High Gothic Lancet Arch Windows along East and West upper galleries
-            [-wallDist + 1.2, wallDist - 1.2].forEach(wx => {
-                [-14, 14].forEach(wz => {
-                    const lancetFrame = new THREE.Mesh(new THREE.TorusGeometry(2.2, 0.35, 8, 16, Math.PI), stoneTrimMat);
-                    lancetFrame.position.set(wx, 21, wz);
-                    lancetFrame.rotation.y = wx > 0 ? -Math.PI / 2 : Math.PI / 2;
-
-                    const lancetGlow = new THREE.Mesh(
-                        new THREE.PlaneGeometry(3.6, 6.2),
-                        new THREE.MeshBasicMaterial({ color: 0x4a7eb5, transparent: true, opacity: 0.18, side: THREE.DoubleSide })
-                    );
-                    lancetGlow.position.set(wx > 0 ? wx - 0.2 : wx + 0.2, 18, wz);
-                    lancetGlow.rotation.y = wx > 0 ? -Math.PI / 2 : Math.PI / 2;
-
-                    scene.add(lancetFrame, lancetGlow);
-                });
-            });
-
-            // Elevated Triforium / Minstrel Spectator Gallery on North Wall
-            const galleryY = 14.5;
-            const galleryZ = -wallDist + 4.2;
-            const galleryFloor = new THREE.Mesh(new THREE.BoxGeometry(42, 0.9, 5.2), stoneMat);
-            galleryFloor.position.set(0, galleryY, galleryZ);
-            galleryFloor.receiveShadow = true;
-            scene.add(galleryFloor);
-
-            // Carved supporting corbel brackets under gallery floor
-            for (let c = -18; c <= 18; c += 6) {
-                const corbel = new THREE.Mesh(new THREE.BoxGeometry(0.85, 2.4, 2.8), stoneTrimMat);
-                corbel.position.set(c, galleryY - 1.4, galleryZ - 1.2);
-                scene.add(corbel);
-            }
-
-            // Stone balustrade rail & miniature arcade balusters
-            const balustradeRail = new THREE.Mesh(new THREE.BoxGeometry(42, 0.3, 0.45), stoneTrimMat);
-            balustradeRail.position.set(0, galleryY + 1.8, galleryZ + 2.3);
-            scene.add(balustradeRail);
-
-            for (let b = -20; b <= 20; b += 1.6) {
-                const baluster = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.16, 1.4, 6), stoneTrimMat);
-                baluster.position.set(b, galleryY + 0.9, galleryZ + 2.3);
-                scene.add(baluster);
-            }
-
-            // Suspended Medieval Iron Wheel Chandeliers hanging from the high vault
-            const chandelierPositions = [
-                [-7.5, 21.5, -6], [7.5, 21.5, -6],
-                [-7.5, 21.5, 8], [7.5, 21.5, 8]
-            ];
-
-            chandelierPositions.forEach(([cx, cy, cz]) => {
-                const chandGroup = new THREE.Group();
-
-                // Heavy forged iron wheel rim
-                const wheelRim = new THREE.Mesh(new THREE.TorusGeometry(2.4, 0.14, 8, 20), ironMat);
-                wheelRim.rotation.x = Math.PI / 2;
-                chandGroup.add(wheelRim);
-
-                // Iron radial cross spokes
-                for (let a = 0; a < 4; a++) {
-                    const spoke = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.08, 4.6), ironMat);
-                    spoke.rotation.y = (a * Math.PI) / 4;
-                    chandGroup.add(spoke);
-                }
-
-                // Hanging chains ascending to vault keystones
-                const chain = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 11, 4), ironMat);
-                chain.position.y = 5.5;
-                chandGroup.add(chain);
-
-                // 8 Upright wax candles around the circumference
-                for (let k = 0; k < 8; k++) {
-                    const ang = (k * Math.PI) / 4;
-                    const kx = Math.cos(ang) * 2.35;
-                    const kz = Math.sin(ang) * 2.35;
-
-                    const candle = new THREE.Mesh(
-                        new THREE.CylinderGeometry(0.08, 0.08, 0.55, 6),
-                        new THREE.MeshStandardMaterial({ color: 0xd6cbb8, roughness: 0.6 })
-                    );
-                    candle.position.set(kx, 0.32, kz);
-
-                    const cFlame = new THREE.Mesh(
-                        new THREE.ConeGeometry(0.09, 0.3, 6),
-                        new THREE.MeshBasicMaterial({ color: 0xfca035 })
-                    );
-                    cFlame.position.set(kx, 0.72, kz);
-                    chandGroup.add(candle, cFlame);
-                }
-
-                chandGroup.position.set(cx, cy, cz);
-                scene.add(chandGroup);
-
-                // Soft warm downward light pool from the chandelier
-                const chLight = new THREE.PointLight(0xf29330, 0.9, 22, 1.8);
-                chLight.position.set(cx, cy - 0.5, cz);
-                scene.add(chLight);
-                torchLights.push({ light: chLight, baseInt: 0.9, seed: Math.random() * 80 });
-            });
-
-            // Relics of Past Duels: Shattered Colossal Stone Knight Head in the ruins
-            const fallenKnightGroup = new THREE.Group();
-            const fallenHorseHead = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2.2, 3.4), stoneMat);
-            fallenHorseHead.rotation.set(0.65, 0.45, -1.2);
-            fallenHorseHead.position.set(-17.5, -0.1, -8.5);
-            fallenHorseHead.receiveShadow = true;
-            fallenHorseHead.castShadow = true;
-
-            // Spiked forehead chamfron half-crushed
-            const brokenChamfron = new THREE.Mesh(new THREE.ConeGeometry(0.4, 1.8, 6), ironMat);
-            brokenChamfron.rotation.set(1.2, 0.8, -1.4);
-            brokenChamfron.position.set(-16.2, 0.4, -7.4);
-
-            fallenKnightGroup.add(fallenHorseHead, brokenChamfron);
-            scene.add(fallenKnightGroup);
-
-            // Broken giant broadsword plunging from cracked slab
-            const brokenSwordGroup = new THREE.Group();
-            const brokenBlade = new THREE.Mesh(new THREE.BoxGeometry(0.35, 4.2, 0.12), ironMat);
-            brokenBlade.position.set(17.2, 1.2, 6.5);
-            brokenBlade.rotation.set(0.35, 0.2, 0.45);
-            const swordCross = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.32, 0.32), ironMat);
-            swordCross.position.set(17.8, 2.8, 6.7);
-            swordCross.rotation.set(0.35, 0.2, 0.45);
-            brokenSwordGroup.add(brokenBlade, swordCross);
-            scene.add(brokenSwordGroup);
-
-            // Sculpted Heraldic Stone Shields mounted on column plinths
-            [
-                [-20.5, 7.5, -20.5], [20.5, 7.5, -20.5],
-                [-20.5, 7.5, 20.5], [20.5, 7.5, 20.5]
-            ].forEach(([sx, sy, sz]) => {
-                const shield = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2.2, 0.22), stoneTrimMat);
-                shield.position.set(sx, sy, sz);
-                shield.rotation.y = Math.atan2(-sx, -sz);
-
-                const shieldBoss = new THREE.Mesh(new THREE.ConeGeometry(0.32, 0.5, 6), goldTrimMat);
-                shieldBoss.position.set(sx * 0.97, sy, sz * 0.97);
-                shieldBoss.rotation.y = Math.atan2(-sx, -sz);
-                shieldBoss.rotation.x = Math.PI / 2;
-
-                scene.add(shield, shieldBoss);
-            });
-
-            // Atmospheric Volumetric Moonlight Beam (Soft translucent cone cutting through high arch)
-            const rayGeo = new THREE.CylinderGeometry(1.2, 10.5, 34, 16, 1, true);
+            // Volumetric Moonlight God-Ray
+            const rayGeo = new THREE.CylinderGeometry(1.4, 11.5, 36, 16, 1, true);
             const rayMat = new THREE.MeshBasicMaterial({
-                color: 0x98c5f5,
+                color: 0x98c8f8,
                 transparent: true,
-                opacity: 0.075,
+                opacity: 0.085,
                 side: THREE.DoubleSide,
                 blending: THREE.AdditiveBlending,
                 depthWrite: false
             });
             const godRay = new THREE.Mesh(rayGeo, rayMat);
-            godRay.position.set(-4, 15, -4);
+            godRay.position.set(-4, 16, -4);
             godRay.rotation.x = 0.22;
             godRay.rotation.z = -0.18;
             scene.add(godRay);
 
-            // Low-lying Subterranean Floor Mist Layer
-            const mistGeo = new THREE.PlaneGeometry(80, 80);
+            // Subterranean Floor Mist
+            const mistGeo = new THREE.PlaneGeometry(85, 85);
             const mistMat = new THREE.MeshBasicMaterial({
                 color: 0x3d5875,
                 transparent: true,
-                opacity: 0.12,
+                opacity: 0.14,
                 depthWrite: false,
                 blending: THREE.AdditiveBlending
             });
@@ -1114,10 +1146,10 @@
             mistPlane.position.y = -0.85;
             scene.add(mistPlane);
 
-            // Four Board Dais Braziers with Iron Tripods
-            const brazierGeo = new THREE.CylinderGeometry(1.05, 0.72, 2.6, 12);
-            const flameGeo = new THREE.ConeGeometry(0.48, 1.25, 8);
-            const flameMat = new THREE.MeshBasicMaterial({ color: 0xf58a28 });
+            // 4 Dais Braziers with Tripods & Real Fire Mesh
+            const brazierGeo = new THREE.CylinderGeometry(1.1, 0.75, 2.7, 12);
+            const flameGeo = new THREE.ConeGeometry(0.5, 1.35, 8);
+            const flameMat = new THREE.MeshBasicMaterial({ color: 0xfda235 });
 
             [[-10.8, -10.8], [10.8, -10.8], [-10.8, 10.8], [10.8, 10.8]].forEach(([bx, bz]) => {
                 const bMesh = new THREE.Mesh(brazierGeo, stoneTrimMat);
@@ -1125,17 +1157,20 @@
                 bMesh.receiveShadow = true;
                 scene.add(bMesh);
 
-                const rim = new THREE.Mesh(new THREE.TorusGeometry(1.05, 0.14, 8, 16), ironMat);
+                const rim = new THREE.Mesh(new THREE.TorusGeometry(1.1, 0.15, 8, 16), ironMat);
                 rim.rotation.x = Math.PI / 2;
-                rim.position.set(bx, 1.4, bz);
+                rim.position.set(bx, 1.45, bz);
                 scene.add(rim);
 
                 const flame = new THREE.Mesh(flameGeo, flameMat);
-                flame.position.set(bx, 1.85, bz);
+                flame.position.set(bx, 1.95, bz);
                 scene.add(flame);
             });
         }
 
+        /* =========================================================================
+           CHESS BOARD DAIS & TILES
+           ========================================================================= */
         function getSquareCoord(fileIdx, rankIdx) {
             return {
                 x: fileIdx * SQUARE_SIZE - BOARD_OFFSET,
@@ -1151,62 +1186,39 @@
 
         function buildChessBoard() {
             const BOARD_WIDTH = 8 * SQUARE_SIZE; // 13.6
-            const TOTAL_DAIS = BOARD_WIDTH + 3.8; // ~17.4
+            const TOTAL_DAIS = BOARD_WIDTH + 4.0; // ~17.6
 
-            // Main heavy stone substructure
-            const daisGeo = new THREE.BoxGeometry(TOTAL_DAIS, 1.2, TOTAL_DAIS);
+            const daisGeo = new THREE.BoxGeometry(TOTAL_DAIS, 1.25, TOTAL_DAIS);
             const dais = new THREE.Mesh(daisGeo, frameMetalMat);
-            dais.position.y = -0.6;
+            dais.position.y = -0.62;
             dais.receiveShadow = true;
             scene.add(dais);
 
-            // Carved outer frieze rim
-            const outerRimGeo = new THREE.BoxGeometry(TOTAL_DAIS + 0.3, 0.35, TOTAL_DAIS + 0.3);
-            const outerRim = new THREE.Mesh(outerRimGeo, frameMetalMat);
-            outerRim.position.y = -0.05;
-            scene.add(outerRim);
-
-            // Diagonal-notched checkered border track
-            const checkBorderGeo = new THREE.BoxGeometry(BOARD_WIDTH + 1.35, 0.08, BOARD_WIDTH + 1.35);
+            const checkBorderGeo = new THREE.BoxGeometry(BOARD_WIDTH + 1.4, 0.08, BOARD_WIDTH + 1.4);
             const checkBorder = new THREE.Mesh(checkBorderGeo, borderCheckMat);
             checkBorder.position.y = 0.03;
             scene.add(checkBorder);
 
-            // Inner recess rim
-            const innerFrameGeo = new THREE.BoxGeometry(BOARD_WIDTH + 0.3, 0.06, BOARD_WIDTH + 0.3);
-            const innerFrame = new THREE.Mesh(innerFrameGeo, frameMetalMat);
-            innerFrame.position.y = 0.04;
-            scene.add(innerFrame);
-
             // 4 Corner Pillars with Silver Domes
-            const cornerOffset = TOTAL_DAIS / 2 - 0.2;
+            const cornerOffset = TOTAL_DAIS / 2 - 0.25;
             const cornerCoords = [
-                [-cornerOffset, -cornerOffset],
-                [cornerOffset, -cornerOffset],
-                [-cornerOffset, cornerOffset],
-                [cornerOffset, cornerOffset]
+                [-cornerOffset, -cornerOffset], [cornerOffset, -cornerOffset],
+                [-cornerOffset, cornerOffset], [cornerOffset, cornerOffset]
             ];
 
             cornerCoords.forEach(([cx, cz]) => {
-                const leg = new THREE.Mesh(new THREE.CylinderGeometry(1.25, 1.45, 1.5, 8), frameMetalMat);
+                const leg = new THREE.Mesh(new THREE.CylinderGeometry(1.3, 1.5, 1.6, 8), frameMetalMat);
                 leg.position.set(cx, -0.65, cz);
-                leg.castShadow = true;
-                leg.receiveShadow = true;
                 scene.add(leg);
 
-                const collar = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.2, 0.35, 8), frameMetalMat);
-                collar.position.set(cx, 0.05, cz);
-                scene.add(collar);
-
-                const dome = new THREE.Mesh(new THREE.SphereGeometry(1.05, 20, 14, 0, Math.PI * 2, 0, Math.PI / 2), cornerDomeMat);
+                const dome = new THREE.Mesh(new THREE.SphereGeometry(1.1, 20, 14, 0, Math.PI * 2, 0, Math.PI / 2), cornerDomeMat);
                 dome.position.set(cx, 0.22, cz);
-                dome.castShadow = true;
                 scene.add(dome);
             });
 
-            // Embedded Ruby Cabochon Studs along perimeter
+            // Embedded Ruby Cabochons along Border
             const rubyGeo = new THREE.SphereGeometry(0.09, 8, 6);
-            const halfW = (BOARD_WIDTH + 1.35) / 2;
+            const halfW = (BOARD_WIDTH + 1.4) / 2;
             for (let i = -3; i <= 3; i++) {
                 const posOffset = (i * SQUARE_SIZE);
                 const r1 = new THREE.Mesh(rubyGeo, rubyMat);
@@ -1220,9 +1232,8 @@
                 scene.add(r1, r2, r3, r4);
             }
 
-            // Playing Grid: Aged Alabaster vs Dark Serpentine Slate
+            // 64 Chess Tiles
             const tileGeo = new THREE.BoxGeometry(SQUARE_SIZE * 0.985, 0.18, SQUARE_SIZE * 0.985);
-
             for (let f = 0; f < 8; f++) {
                 for (let r = 0; r < 8; r++) {
                     const isDark = (f + r) % 2 === 0;
@@ -1240,12 +1251,15 @@
             }
         }
 
+        /* =========================================================================
+           SCULPTED HARRY POTTER 3D PIECES (True Movie-Accurate Sculpting)
+           ========================================================================= */
         function createPieceMesh(type, color) {
             const group = new THREE.Group();
             const mat = color === 'w' ? marbleMat : obsidianMat;
             const accentMat = color === 'w' ? goldTrimMat : weaponMetalMat;
 
-            // Multi-tier pedestal with molded lathe profile
+            // Carved Lathe Pedestal Base
             const pedestalPoints = [
                 new THREE.Vector2(0.74, 0.0),
                 new THREE.Vector2(0.72, 0.12),
@@ -1262,12 +1276,15 @@
             const baseFillet = new THREE.Mesh(new THREE.TorusGeometry(0.52, 0.045, 8, 20), accentMat);
             baseFillet.rotation.x = Math.PI / 2;
             baseFillet.position.y = 0.34;
-
             group.add(basePlinth, baseFillet);
 
+            // Container for parts that animate during strikes
+            const strikeGroup = new THREE.Group();
+            group.add(strikeGroup);
+            group.userData.strikeGroup = strikeGroup;
+
             switch (type) {
-                case 'p': { 
-                    // Crouching Armored Sentinel
+                case 'p': { // Crouching Armored Sentinel with Battleaxe/Scythe
                     const knees = new THREE.Mesh(new THREE.BoxGeometry(0.58, 0.38, 0.46), mat);
                     knees.position.set(0, 0.46, 0.05);
                     knees.castShadow = true;
@@ -1279,30 +1296,15 @@
 
                     const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.26, 12, 10), mat);
                     helmet.position.set(0, 1.28, 0.22);
-                    helmet.castShadow = true;
 
                     const helmCrest = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.22, 0.32), accentMat);
                     helmCrest.position.set(0, 1.44, 0.2);
 
-                    const visorSlit = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.04, 0.1), accentMat);
-                    visorSlit.position.set(0, 1.27, 0.37);
-
-                    [-0.38, 0.38].forEach(x => {
-                        const pauldron = new THREE.Mesh(new THREE.SphereGeometry(0.18, 8, 8), mat);
-                        pauldron.position.set(x, 1.08, 0.12);
-                        const spike = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.16, 6), accentMat);
-                        spike.position.set(x * 1.2, 1.2, 0.12);
-                        spike.rotation.z = x > 0 ? -0.5 : 0.5;
-                        group.add(pauldron, spike);
-                    });
-
                     const shield = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.9, 0.48), mat);
                     shield.position.set(0.42, 0.74, 0.18);
                     shield.rotation.y = -0.22;
-                    const shieldBoss = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.2, 8), accentMat);
-                    shieldBoss.position.set(0.48, 0.76, 0.18);
-                    shieldBoss.rotation.z = -Math.PI / 2;
 
+                    // Articulated Weapon Arm for strikes
                     const weaponShaft = new THREE.Mesh(new THREE.CylinderGeometry(0.038, 0.038, 1.7, 6), weaponMetalMat);
                     weaponShaft.position.set(-0.34, 0.78, 0.18);
                     weaponShaft.rotation.x = -0.32;
@@ -1310,11 +1312,11 @@
                     pickHead.position.set(-0.34, 1.55, 0.44);
                     pickHead.rotation.x = 1.35;
 
-                    group.add(knees, torso, helmet, helmCrest, visorSlit, shield, shieldBoss, weaponShaft, pickHead);
+                    strikeGroup.add(weaponShaft, pickHead);
+                    group.add(knees, torso, helmet, helmCrest, shield);
                     break;
                 }
-                case 'r': { 
-                    // Fortified Stone Keep with Corbels
+                case 'r': { // Fortified Stone Castle Keep with Parapets
                     const towerPoints = [
                         new THREE.Vector2(0.56, 0.35),
                         new THREE.Vector2(0.52, 0.75),
@@ -1332,7 +1334,6 @@
                         const a = (i * Math.PI) / 2;
                         buttress.position.set(Math.cos(a) * 0.52, 1.05, Math.sin(a) * 0.52);
                         buttress.rotation.y = a;
-                        buttress.castShadow = true;
                         group.add(buttress);
                     }
 
@@ -1346,25 +1347,17 @@
 
                     const sentry = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 0.45, 8), mat);
                     sentry.position.set(0, 2.2, 0);
-                    const sentryHelm = new THREE.Mesh(new THREE.SphereGeometry(0.16, 8, 8), mat);
-                    sentryHelm.position.set(0, 2.5, 0);
-                    const sentryBow = new THREE.Mesh(new THREE.TorusGeometry(0.24, 0.035, 6, 10, Math.PI), accentMat);
-                    sentryBow.position.set(0, 2.3, 0.22);
-                    sentryBow.rotation.z = Math.PI / 2;
-                    group.add(sentry, sentryHelm, sentryBow);
+                    group.add(sentry);
                     break;
                 }
-                case 'n': { 
-                    // Rearing Warhorse with Armored Knight (Ron Weasley's Knight)
+                case 'n': { // Rearing Warhorse with Armored Knight (Ron Weasley's Steed)
                     const hindGroup = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.46, 0.85, 10), mat);
                     hindGroup.position.set(0, 0.76, -0.16);
                     hindGroup.rotation.x = -0.58;
-                    hindGroup.castShadow = true;
 
                     const horseChest = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.5, 0.95, 10), mat);
                     horseChest.position.set(0, 1.38, 0.12);
                     horseChest.rotation.x = -0.32;
-                    horseChest.castShadow = true;
 
                     const neck = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.88, 0.6), mat);
                     neck.position.set(0, 1.82, 0.36);
@@ -1378,16 +1371,8 @@
                     chamfron.position.set(0, 2.32, 0.98);
                     chamfron.rotation.x = 1.48;
 
-                    for (let m = 0; m < 5; m++) {
-                        const maneRidge = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.18, 0.16), accentMat);
-                        maneRidge.position.set(0, 1.6 + m * 0.14, 0.18 - m * 0.04);
-                        maneRidge.rotation.x = 0.4;
-                        group.add(maneRidge);
-                    }
-
                     const knightBody = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.34, 0.72, 8), mat);
                     knightBody.position.set(0, 1.86, -0.06);
-                    knightBody.rotation.x = -0.22;
 
                     const knightHelm = new THREE.Mesh(new THREE.SphereGeometry(0.2, 10, 8), mat);
                     knightHelm.position.set(0, 2.34, 0.02);
@@ -1396,14 +1381,10 @@
                     knightLance.position.set(0.42, 1.84, 0.54);
                     knightLance.rotation.x = 0.58;
 
-                    const riderShield = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.66, 0.42), accentMat);
-                    riderShield.position.set(-0.38, 1.88, 0.06);
-
-                    group.add(hindGroup, horseChest, neck, horseHead, chamfron, knightBody, knightHelm, knightLance, riderShield);
+                    strikeGroup.add(hindGroup, horseChest, neck, horseHead, chamfron, knightBody, knightHelm, knightLance);
                     break;
                 }
-                case 'b': { 
-                    // Cloaked Inquisitor with Mitre Headdress
+                case 'b': { // Cloaked Inquisitor / Sorcerer with Mitre & Arcane Staff
                     const robePoints = [
                         new THREE.Vector2(0.52, 0.35),
                         new THREE.Vector2(0.48, 0.9),
@@ -1429,11 +1410,11 @@
                     const staffCrook = new THREE.Mesh(new THREE.TorusGeometry(0.22, 0.055, 6, 14), accentMat);
                     staffCrook.position.set(0.38, 2.85, 0.16);
 
-                    group.add(robes, mitreBase, peak1, peak2, stoleGold, staff, staffCrook);
+                    strikeGroup.add(staff, staffCrook);
+                    group.add(robes, mitreBase, peak1, peak2, stoleGold);
                     break;
                 }
-                case 'q': { 
-                    // The Queen with Flared Gown & Executioner Sword
+                case 'q': { // The Monolithic Queen with Executioner Broadsword
                     const gownPoints = [
                         new THREE.Vector2(0.58, 0.35),
                         new THREE.Vector2(0.52, 0.95),
@@ -1458,18 +1439,25 @@
                         group.add(spike);
                     }
 
-                    const bigBlade = new THREE.Mesh(new THREE.BoxGeometry(0.14, 2.2, 0.05), weaponMetalMat);
-                    bigBlade.position.set(0, 1.2, 0.48);
-                    const crossGuard = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.1, 0.12), accentMat);
-                    crossGuard.position.set(0, 2.22, 0.48);
-                    const swordPommel = new THREE.Mesh(new THREE.SphereGeometry(0.11, 8, 8), accentMat);
-                    swordPommel.position.set(0, 2.54, 0.48);
+                    // Articulated Colossal Executioner Sword
+                    const swordPivot = new THREE.Group();
+                    swordPivot.position.set(0, 1.8, 0.2);
 
-                    group.add(gown, head, bigBlade, crossGuard, swordPommel);
+                    const bigBlade = new THREE.Mesh(new THREE.BoxGeometry(0.14, 2.3, 0.05), weaponMetalMat);
+                    bigBlade.position.set(0, -0.6, 0.28);
+                    const crossGuard = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.1, 0.12), accentMat);
+                    crossGuard.position.set(0, 0.42, 0.28);
+                    const swordPommel = new THREE.Mesh(new THREE.SphereGeometry(0.11, 8, 8), accentMat);
+                    swordPommel.position.set(0, 0.74, 0.28);
+
+                    swordPivot.add(bigBlade, crossGuard, swordPommel);
+                    strikeGroup.add(swordPivot);
+                    group.userData.swordPivot = swordPivot;
+
+                    group.add(gown, head);
                     break;
                 }
-                case 'k': { 
-                    // Imperial Warlord King with Battleaxe
+                case 'k': { // Imperial Sovereign King with Jagged Crown & Battleaxe
                     const mantlePoints = [
                         new THREE.Vector2(0.62, 0.35),
                         new THREE.Vector2(0.56, 1.1),
@@ -1501,7 +1489,8 @@
                     const axeBlade = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.6, 0.06), weaponMetalMat);
                     axeBlade.position.set(0.68, 2.82, 0.2);
 
-                    group.add(mantle, kingHead, crownBase, crownCrossV, crownCrossH, axeShaft, axeBlade);
+                    strikeGroup.add(axeShaft, axeBlade);
+                    group.add(mantle, kingHead, crownBase, crownCrossV, crownCrossH);
                     break;
                 }
             }
@@ -1547,15 +1536,18 @@
             piecesMap.clear();
         }
 
+        /* =========================================================================
+           COMBAT ENGINE: ACTION CAMERA, STRIKE ANIMATIONS, PHYSICS SHATTER
+           ========================================================================= */
         function shakeCamera() {
             const originalPos = camera.position.clone();
             const tl = gsap.timeline();
-            for (let i = 0; i < 4; i++) {
+            for (let i = 0; i < 5; i++) {
                 tl.to(camera.position, {
-                    x: originalPos.x + (Math.random() - 0.5) * 0.22,
-                    y: originalPos.y + (Math.random() - 0.5) * 0.22,
-                    z: originalPos.z + (Math.random() - 0.5) * 0.22,
-                    duration: 0.04
+                    x: originalPos.x + (Math.random() - 0.5) * 0.35,
+                    y: originalPos.y + (Math.random() - 0.5) * 0.35,
+                    z: originalPos.z + (Math.random() - 0.5) * 0.35,
+                    duration: 0.035
                 });
             }
             tl.to(camera.position, { x: originalPos.x, y: originalPos.y, z: originalPos.z, duration: 0.08 });
@@ -1563,7 +1555,8 @@
 
         function showMovieQuote(text) {
             const banner = document.getElementById('movie-quote-banner');
-            banner.textContent = text || movieQuotes[Math.floor(Math.random() * movieQuotes.length)];
+            const quoteEl = document.getElementById('movie-quote-text');
+            quoteEl.textContent = text || movieQuotes[Math.floor(Math.random() * movieQuotes.length)];
             banner.classList.remove('opacity-0');
             banner.classList.add('opacity-100');
             setTimeout(() => {
@@ -1577,35 +1570,53 @@
             shakeCamera();
             showMovieQuote();
 
-            const shardCount = 28;
+            // Expanding magical shockwave ring on the tile
+            const shockGeo = new THREE.RingGeometry(0.1, 0.35, 24);
+            const shockMat = new THREE.MeshBasicMaterial({
+                color: pieceColor === 'w' ? 0xffeaae : 0x4a90e2,
+                transparent: true,
+                opacity: 0.95,
+                side: THREE.DoubleSide
+            });
+            const shockwave = new THREE.Mesh(shockGeo, shockMat);
+            shockwave.rotation.x = -Math.PI / 2;
+            shockwave.position.copy(position);
+            shockwave.position.y = 0.15;
+            scene.add(shockwave);
+
+            gsap.to(shockwave.scale, { x: 5.5, y: 5.5, duration: 0.45, ease: "power2.out" });
+            gsap.to(shockMat, { opacity: 0, duration: 0.45, ease: "power2.out", onComplete: () => scene.remove(shockwave) });
+
+            // 45+ 3D physics-exploding stone shards
+            const shardCount = 48;
             const shardGroup = new THREE.Group();
-            const colorHex = pieceColor === 'w' ? 0xd5cbba : 0x1b1f26;
+            const colorHex = pieceColor === 'w' ? 0xdad0bf : 0x181c24;
             const shardMat = new THREE.MeshStandardMaterial({
                 color: colorHex,
-                roughness: 0.65,
-                metalness: pieceColor === 'w' ? 0.08 : 0.4
+                roughness: 0.7,
+                metalness: pieceColor === 'w' ? 0.08 : 0.45
             });
 
             const shards = [];
 
             for (let i = 0; i < shardCount; i++) {
                 const geo = Math.random() > 0.4
-                    ? new THREE.TetrahedronGeometry(Math.random() * 0.26 + 0.1)
+                    ? new THREE.TetrahedronGeometry(Math.random() * 0.28 + 0.08)
                     : new THREE.BoxGeometry(0.18, 0.18, 0.18);
                 const mesh = new THREE.Mesh(geo, shardMat);
                 mesh.position.copy(position);
-                mesh.position.y += Math.random() * 0.7;
+                mesh.position.y += Math.random() * 0.9;
                 shardGroup.add(mesh);
 
                 const angle = Math.random() * Math.PI * 2;
-                const speed = Math.random() * 3.6 + 1.6;
+                const speed = Math.random() * 4.2 + 1.8;
                 shards.push({
                     mesh,
                     velX: Math.cos(angle) * speed,
-                    velY: Math.random() * 4.6 + 2.2,
+                    velY: Math.random() * 5.2 + 2.5,
                     velZ: Math.sin(angle) * speed,
-                    rotX: (Math.random() - 0.5) * 12,
-                    rotY: (Math.random() - 0.5) * 12
+                    rotX: (Math.random() - 0.5) * 14,
+                    rotY: (Math.random() - 0.5) * 14
                 });
             }
 
@@ -1617,7 +1628,7 @@
                 let active = false;
 
                 shards.forEach(s => {
-                    s.velY -= 11.0 * 0.016;
+                    s.velY -= 12.0 * 0.016; // gravity
                     s.mesh.position.x += s.velX * 0.016;
                     s.mesh.position.y += s.velY * 0.016;
                     s.mesh.position.z += s.velZ * 0.016;
@@ -1625,20 +1636,21 @@
                     s.mesh.rotation.x += s.rotX * 0.016;
                     s.mesh.rotation.y += s.rotY * 0.016;
 
+                    // Bounce on floor & board dais
                     if (s.mesh.position.y < 0.12) {
                         s.mesh.position.y = 0.12;
-                        s.velY *= -0.3;
-                        s.velX *= 0.6;
-                        s.velZ *= 0.6;
+                        s.velY *= -0.32;
+                        s.velX *= 0.55;
+                        s.velZ *= 0.55;
                     }
-                    if (elapsed < 1.5) active = true;
+                    if (elapsed < 1.6) active = true;
                 });
 
                 if (elapsed >= 0.9) {
-                    shardGroup.scale.multiplyScalar(0.93);
+                    shardGroup.scale.multiplyScalar(0.92);
                 }
 
-                if (!active || elapsed >= 1.6) {
+                if (!active || elapsed >= 1.7) {
                     scene.remove(shardGroup);
                     const idx = particleSystems.indexOf(animateShards);
                     if (idx !== -1) particleSystems.splice(idx, 1);
@@ -1648,7 +1660,7 @@
             particleSystems.push(animateShards);
         }
 
-        function executeAnimatedMove(fromSquare, toSquare, isAIMove = false, onFinished = null) {
+        function executeAnimatedMove(fromSquare, toSquare, isAIMove = false, onFinished = null, promotionChoice = 'q') {
             const pieceMesh = piecesMap.get(fromSquare);
             if (!pieceMesh) return;
 
@@ -1660,7 +1672,7 @@
                 const moveResult = chess.move({
                     from: fromSquare,
                     to: toSquare,
-                    promotion: 'q'
+                    promotion: promotionChoice
                 });
 
                 if (!moveResult) {
@@ -1674,6 +1686,7 @@
                 pieceMesh.userData.square = toSquare;
                 piecesMap.set(toSquare, pieceMesh);
 
+                // Handle Castling Rook Movement
                 if (moveResult.flags.includes('k') || moveResult.flags.includes('q')) {
                     if (toSquare === 'g1') moveRookInstantly('h1', 'f1');
                     else if (toSquare === 'c1') moveRookInstantly('a1', 'd1');
@@ -1681,18 +1694,20 @@
                     else if (toSquare === 'c8') moveRookInstantly('a8', 'd8');
                 }
 
+                // Handle Pawn Promotion
                 if (moveResult.flags.includes('p')) {
                     scene.remove(pieceMesh);
-                    const newQueen = createPieceMesh('q', moveResult.color);
-                    newQueen.position.set(targetPos.x, 0.1, targetPos.z);
-                    newQueen.userData = {
+                    const promoType = moveResult.promotion || 'q';
+                    const newPromoted = createPieceMesh(promoType, moveResult.color);
+                    newPromoted.position.set(targetPos.x, 0.1, targetPos.z);
+                    newPromoted.userData = {
                         square: toSquare,
-                        type: 'q',
+                        type: promoType,
                         color: moveResult.color,
                         baseY: 0.1
                     };
-                    scene.add(newQueen);
-                    piecesMap.set(toSquare, newQueen);
+                    scene.add(newPromoted);
+                    piecesMap.set(toSquare, newPromoted);
                 }
 
                 updateUIChronicle(moveResult);
@@ -1701,39 +1716,102 @@
                 isAnimating = false;
                 if (onFinished) onFinished();
 
-                if (chess.turn() === 'b' && !chess.game_over()) {
+                // If Playing Movie Puzzle Mode ("Ron's Sacrifice")
+                if (gameMode === 'movie_puzzle') {
+                    handleStoryPuzzleStep(moveResult);
+                    return;
+                }
+
+                // Handle AI turn
+                if (gameMode === 'ai' && chess.turn() === 'b' && !chess.game_over()) {
                     triggerAIMove();
+                } else if (gameMode === 'duel_2p' && !chess.game_over()) {
+                    // In 2P mode, optional rotate camera
+                    handle2PCameraRotate();
                 }
             };
 
             if (capturedMesh) {
+                // VIOLENT WIZARD CHESS DUEL & CAPTURE
                 soundFX.playStoneGrind();
-                gsap.timeline()
-                    .to(pieceMesh.position, {
-                        x: (pieceMesh.position.x + targetPos.x) / 2,
-                        z: (pieceMesh.position.z + targetPos.z) / 2,
-                        y: 1.3,
-                        duration: 0.28,
-                        ease: "power2.in"
-                    })
-                    .to(pieceMesh.position, {
-                        x: targetPos.x,
-                        z: targetPos.z,
-                        y: 0.1,
-                        duration: 0.22,
-                        ease: "power3.in",
-                        onComplete: () => {
-                            createShatterExplosion(capturedMesh.position.clone(), capturedMesh.userData.color);
-                            scene.remove(capturedMesh);
-                            piecesMap.delete(toSquare);
-                            finalizeMove();
-                        }
+
+                // Trigger Action Cam & Letterbox Bars if enabled
+                const prevCamPos = camera.position.clone();
+                const prevTarget = controls.target.clone();
+
+                if (actionCamEnabled) {
+                    document.body.classList.add('action-cam-active');
+                    // Dynamic swooping action camera
+                    const camX = targetPos.x + (targetPos.x > 0 ? 3.5 : -3.5);
+                    const camZ = targetPos.z + (targetPos.z > 0 ? 4.5 : -4.5);
+                    gsap.to(camera.position, {
+                        x: camX, y: 4.8, z: camZ,
+                        duration: 0.45, ease: "power2.out"
                     });
+                    gsap.to(controls.target, {
+                        x: targetPos.x, y: 1.2, z: targetPos.z,
+                        duration: 0.45, ease: "power2.out"
+                    });
+                }
+
+                const tl = gsap.timeline();
+
+                // Attacker charges toward defender
+                tl.to(pieceMesh.position, {
+                    x: (pieceMesh.position.x + targetPos.x) / 2,
+                    z: (pieceMesh.position.z + targetPos.z) / 2,
+                    y: 1.2,
+                    duration: 0.35,
+                    ease: "power2.in"
+                });
+
+                // Attacker strikes! (Articulated weapon animation)
+                const pieceType = pieceMesh.userData.type;
+                if (pieceType === 'q' && pieceMesh.userData.swordPivot) {
+                    // Queen raises broadsword overhead and plunges down!
+                    tl.to(pieceMesh.userData.swordPivot.rotation, { x: -Math.PI / 1.8, duration: 0.2, ease: "power1.in" })
+                      .to(pieceMesh.userData.swordPivot.rotation, { x: 0, duration: 0.15, ease: "power3.in" });
+                } else if (pieceType === 'n' && pieceMesh.userData.strikeGroup) {
+                    // Horse rears up on hind legs!
+                    tl.to(pieceMesh.userData.strikeGroup.rotation, { x: -0.65, duration: 0.22, ease: "power1.out" })
+                      .to(pieceMesh.userData.strikeGroup.rotation, { x: 0, duration: 0.15, ease: "power3.in" });
+                }
+
+                tl.to(pieceMesh.position, {
+                    x: targetPos.x,
+                    z: targetPos.z,
+                    y: 0.1,
+                    duration: 0.22,
+                    ease: "power3.in",
+                    onComplete: () => {
+                        createShatterExplosion(capturedMesh.position.clone(), capturedMesh.userData.color);
+                        scene.remove(capturedMesh);
+                        piecesMap.delete(toSquare);
+                        finalizeMove();
+
+                        // Restore camera after action cam
+                        if (actionCamEnabled) {
+                            setTimeout(() => {
+                                document.body.classList.remove('action-cam-active');
+                                gsap.to(camera.position, {
+                                    x: prevCamPos.x, y: prevCamPos.y, z: prevCamPos.z,
+                                    duration: 0.8, ease: "power2.inOut"
+                                });
+                                gsap.to(controls.target, {
+                                    x: prevTarget.x, y: prevTarget.y, z: prevTarget.z,
+                                    duration: 0.8, ease: "power2.inOut"
+                                });
+                            }, 500);
+                        }
+                    }
+                });
+
             } else {
+                // Peaceful stone slide move
                 soundFX.playStoneGrind();
                 gsap.timeline()
-                    .to(pieceMesh.position, { y: 0.7, duration: 0.22, ease: "power1.out" })
-                    .to(pieceMesh.position, { x: targetPos.x, z: targetPos.z, duration: 0.36, ease: "power2.inOut" })
+                    .to(pieceMesh.position, { y: 0.65, duration: 0.22, ease: "power1.out" })
+                    .to(pieceMesh.position, { x: targetPos.x, z: targetPos.z, duration: 0.38, ease: "power2.inOut" })
                     .to(pieceMesh.position, { y: 0.1, duration: 0.18, ease: "power1.in", onComplete: finalizeMove });
             }
         }
@@ -1754,47 +1832,32 @@
             });
         }
 
-        function triggerAIMove() {
-            setTimeout(() => {
-                if (chess.game_over()) return;
+        /* =========================================================================
+           WIZARD CHESS AI ENGINES (Minimax + Positional Piece-Square Tables)
+           ========================================================================= */
+        const PAWN_PST = [
+            0,  0,  0,  0,  0,  0,  0,  0,
+            50, 50, 50, 50, 50, 50, 50, 50,
+            10, 10, 20, 30, 30, 20, 10, 10,
+             5,  5, 10, 25, 25, 10,  5,  5,
+             0,  0,  0, 20, 20,  0,  0,  0,
+             5, -5,-10,  0,  0,-10, -5,  5,
+             5, 10, 10,-20,-20, 10, 10,  5,
+             0,  0,  0,  0,  0,  0,  0,  0
+        ];
 
-                const legalMoves = chess.moves({ verbose: true });
-                if (legalMoves.length === 0) return;
+        const KNIGHT_PST = [
+            -50,-40,-30,-30,-30,-30,-40,-50,
+            -40,-20,  0,  0,  0,  0,-20,-40,
+            -30,  0, 10, 15, 15, 10,  0,-30,
+            -30,  5, 15, 20, 20, 15,  5,-30,
+            -30,  0, 15, 20, 20, 15,  0,-30,
+            -30,  5, 10, 15, 15, 10,  5,-30,
+            -40,-20,  0,  5,  5,  0,-20,-40,
+            -50,-40,-30,-30,-30,-30,-40,-50
+        ];
 
-                let chosenMove = null;
-
-                if (aiDifficulty === 'novice') {
-                    chosenMove = legalMoves[Math.floor(Math.random() * legalMoves.length)];
-                } else if (aiDifficulty === 'apprentice') {
-                    const captureMoves = legalMoves.filter(m => m.captured);
-                    if (captureMoves.length > 0) {
-                        chosenMove = captureMoves[Math.floor(Math.random() * captureMoves.length)];
-                    } else {
-                        chosenMove = legalMoves[Math.floor(Math.random() * legalMoves.length)];
-                    }
-                } else {
-                    let bestScore = -Infinity;
-                    legalMoves.forEach(move => {
-                        chess.move(move);
-                        const score = -evaluateBoard(chess);
-                        chess.undo();
-                        if (score > bestScore) {
-                            bestScore = score;
-                            chosenMove = move;
-                        }
-                    });
-                    if (!chosenMove) {
-                        chosenMove = legalMoves[Math.floor(Math.random() * legalMoves.length)];
-                    }
-                }
-
-                if (chosenMove) {
-                    executeAnimatedMove(chosenMove.from, chosenMove.to, true);
-                }
-            }, 600);
-        }
-
-        function evaluateBoard(game) {
+        function evaluateBoardDeep(game) {
             let total = 0;
             const board = game.board();
 
@@ -1802,9 +1865,13 @@
                 for (let f = 0; f < 8; f++) {
                     const p = board[r][f];
                     if (p) {
-                        const val = pieceValues[p.type] * 10;
-                        const centerBonus = (3.5 - Math.abs(3.5 - f)) + (3.5 - Math.abs(3.5 - r));
-                        const score = val + centerBonus;
+                        const baseVal = pieceValues[p.type] * 100;
+                        let pstVal = 0;
+                        const idx = r * 8 + f;
+                        if (p.type === 'p') pstVal = p.color === 'w' ? PAWN_PST[63 - idx] : PAWN_PST[idx];
+                        else if (p.type === 'n') pstVal = p.color === 'w' ? KNIGHT_PST[63 - idx] : KNIGHT_PST[idx];
+
+                        const score = baseVal + pstVal;
                         total += (p.color === 'b') ? score : -score;
                     }
                 }
@@ -1812,9 +1879,263 @@
             return total;
         }
 
+        function minimax(game, depth, alpha, beta, isMaximizing) {
+            if (depth === 0 || game.game_over()) {
+                return evaluateBoardDeep(game);
+            }
+
+            const moves = game.moves({ verbose: true });
+            if (isMaximizing) {
+                let maxEval = -Infinity;
+                for (let i = 0; i < moves.length; i++) {
+                    game.move(moves[i]);
+                    const evaluation = minimax(game, depth - 1, alpha, beta, false);
+                    game.undo();
+                    maxEval = Math.max(maxEval, evaluation);
+                    alpha = Math.max(alpha, evaluation);
+                    if (beta <= alpha) break;
+                }
+                return maxEval;
+            } else {
+                let minEval = Infinity;
+                for (let i = 0; i < moves.length; i++) {
+                    game.move(moves[i]);
+                    const evaluation = minimax(game, depth - 1, alpha, beta, true);
+                    game.undo();
+                    minEval = Math.min(minEval, evaluation);
+                    beta = Math.min(beta, evaluation);
+                    if (beta <= alpha) break;
+                }
+                return minEval;
+            }
+        }
+
+        function triggerAIMove() {
+            setTimeout(() => {
+                if (chess.game_over() || chess.turn() !== 'b') return;
+
+                const legalMoves = chess.moves({ verbose: true });
+                if (legalMoves.length === 0) return;
+
+                let chosenMove = null;
+
+                if (aiDifficulty === 'ron') {
+                    // Ron: Aggressive, plays fast, captures when possible or random bold moves
+                    const captures = legalMoves.filter(m => m.captured);
+                    chosenMove = (captures.length > 0 && Math.random() > 0.3)
+                        ? captures[Math.floor(Math.random() * captures.length)]
+                        : legalMoves[Math.floor(Math.random() * legalMoves.length)];
+
+                } else if (aiDifficulty === 'hermione') {
+                    // Hermione: Calculates 1-ply ahead, balances piece safety and center
+                    let bestScore = -Infinity;
+                    legalMoves.forEach(move => {
+                        chess.move(move);
+                        const score = evaluateBoardDeep(chess);
+                        chess.undo();
+                        if (score > bestScore) {
+                            bestScore = score;
+                            chosenMove = move;
+                        }
+                    });
+
+                } else if (aiDifficulty === 'mcgonagall') {
+                    // McGonagall: Minimax Depth 2 with Alpha-Beta
+                    let bestScore = -Infinity;
+                    for (let i = 0; i < legalMoves.length; i++) {
+                        const move = legalMoves[i];
+                        chess.move(move);
+                        const score = minimax(chess, 2, -Infinity, Infinity, false);
+                        chess.undo();
+                        if (score > bestScore) {
+                            bestScore = score;
+                            chosenMove = move;
+                        }
+                    }
+
+                } else if (aiDifficulty === 'voldemort') {
+                    // Voldemort: Minimax Depth 3 + aggressive check bonuses
+                    let bestScore = -Infinity;
+                    for (let i = 0; i < legalMoves.length; i++) {
+                        const move = legalMoves[i];
+                        chess.move(move);
+                        let score = minimax(chess, 2, -Infinity, Infinity, false);
+                        if (chess.in_check()) score += 80;
+                        chess.undo();
+                        if (score > bestScore) {
+                            bestScore = score;
+                            chosenMove = move;
+                        }
+                    }
+                }
+
+                if (!chosenMove) chosenMove = legalMoves[0];
+                executeAnimatedMove(chosenMove.from, chosenMove.to, true);
+            }, 600);
+        }
+
+        /* =========================================================================
+           STORY MODE: "RON WEASLEY'S SACRIFICE" (Film Climax Recreation)
+           ========================================================================= */
+        let storyStep = 1;
+
+        function startRonSacrificeMode() {
+            gameMode = 'movie_puzzle';
+            storyStep = 1;
+
+            // Setup exact cinematic board position from the movie
+            // White: King on e1, Rook on a1 (Hermione), Bishop on c1 (Harry), Knight on e4 (Ron)
+            // Black: King on g8, Queen on d8, Pawns on f7, g7, h7, etc.
+            chess.load("3q2k1/5ppp/8/8/4N3/8/8/R1B1K3 w Q - 0 1");
+            spawnInitialPieces();
+
+            document.getElementById('game-mode-badge').textContent = "Movie Puzzle: Ron's Sacrifice";
+            document.getElementById('mode-label').textContent = "Mode: Ron's Sacrifice";
+
+            const storyBanner = document.getElementById('story-banner');
+            storyBanner.classList.remove('hidden');
+            document.getElementById('story-speaker').textContent = "Ronald Weasley";
+            document.getElementById('story-step-badge').textContent = "Step 1/2";
+            document.getElementById('story-dialogue').textContent = "\"You understand right, Harry? Once I make my move, the Queen will take me... then you're free to checkmate the King!\"";
+            document.getElementById('story-instruction').textContent = "Objective: Move Ron's Knight (e4) to f6 or d6 to deliver Check!";
+
+            soundFX.speakQuote("Once I make my move, the Queen will take me.");
+            showMovieQuote("\"Not me, not Hermione... YOU!\" — Ron");
+        }
+
+        function handleStoryPuzzleStep(move) {
+            if (storyStep === 1) {
+                // Player made Ron's move!
+                if (move.from === 'e4' && chess.in_check()) {
+                    storyStep = 2;
+                    document.getElementById('story-step-badge').textContent = "Step 2/2";
+                    document.getElementById('story-dialogue').textContent = "\"Knight takes... Check!\" — The Black Queen rises!";
+                    document.getElementById('story-instruction').textContent = "Watch the Queen take Ron, then strike with Harry (c1 Bishop)!";
+
+                    // The Black Queen draws her sword and smashes Ron's Knight!
+                    setTimeout(() => {
+                        const queenMove = chess.moves({ verbose: true }).find(m => m.captured && m.to === move.to);
+                        if (queenMove) {
+                            executeAnimatedMove(queenMove.from, queenMove.to, true, () => {
+                                document.getElementById('story-speaker').textContent = "Harry Potter";
+                                document.getElementById('story-dialogue').textContent = "\"RON! ...Harry, checkmate the King with your Bishop!\"";
+                                document.getElementById('story-instruction').textContent = "Objective: Move Bishop to deliver Checkmate!";
+                            });
+                        }
+                    }, 800);
+                } else {
+                    showMovieQuote("Ron: \"No, Harry! That's not the right square!\"");
+                    soundFX.playOminousCheck();
+                }
+            } else if (storyStep === 2) {
+                // Player delivers final checkmate!
+                if (chess.in_checkmate()) {
+                    document.getElementById('story-dialogue').textContent = "\"Checkmate! The Sorcerer's Stone is protected!\"";
+                    document.getElementById('story-instruction').textContent = "Victory! You have defeated Quirrell and Voldemort's barrier!";
+                    soundFX.speakQuote("Checkmate! We have won!");
+                }
+            }
+        }
+
+        /* =========================================================================
+           LUMOS HINT SPELL & TIME-TURNER UNDO
+           ========================================================================= */
+        function clearHintRays() {
+            currentHintSquares.forEach(mesh => scene.remove(mesh));
+            currentHintSquares.length = 0;
+        }
+
+        function castLumosHint() {
+            clearHintRays();
+            if (chess.game_over() || chess.turn() !== 'w') return;
+
+            soundFX.playMagicChime();
+            showMovieQuote("\"Lumos!\" — The optimal path is revealed.");
+
+            // Find best move for white
+            const legalMoves = chess.moves({ verbose: true });
+            let bestMove = null;
+            let bestScore = -Infinity;
+
+            legalMoves.forEach(m => {
+                chess.move(m);
+                const score = -evaluateBoardDeep(chess);
+                chess.undo();
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestMove = m;
+                }
+            });
+
+            if (bestMove) {
+                const targetPos = squareToPos(bestMove.to);
+                const beamGeo = new THREE.CylinderGeometry(0.08, 0.45, 14, 16);
+                const beamMat = new THREE.MeshBasicMaterial({
+                    color: 0xffe070,
+                    transparent: true,
+                    opacity: 0.65,
+                    blending: THREE.AdditiveBlending
+                });
+                const beam = new THREE.Mesh(beamGeo, beamMat);
+                beam.position.set(targetPos.x, 7, targetPos.z);
+                scene.add(beam);
+                currentHintSquares.push(beam);
+
+                gsap.to(beam.scale, { x: 1.5, z: 1.5, yoyo: true, repeat: 3, duration: 0.4, onComplete: clearHintRays });
+            }
+        }
+
+        function castTimeTurnerUndo() {
+            if (isAnimating) return;
+
+            if (gameMode === 'ai') {
+                // Undo Black AI move & White move
+                chess.undo();
+                chess.undo();
+            } else {
+                chess.undo();
+            }
+
+            clearMoveHighlights();
+            clearHintRays();
+            spawnInitialPieces();
+            soundFX.playMagicChime();
+            showMovieQuote("\"The Time-Turner turns back the hands of fate!\"");
+
+            const historyEl = document.getElementById('move-history');
+            if (historyEl.children.length > 2) {
+                historyEl.removeChild(historyEl.lastElementChild);
+                if (gameMode === 'ai' && historyEl.children.length > 1) {
+                    historyEl.removeChild(historyEl.lastElementChild);
+                }
+            }
+
+            updateCapturedRacks();
+            checkGameState();
+        }
+
+        function handle2PCameraRotate() {
+            const isWhiteTurn = chess.turn() === 'w';
+            const targetZ = isWhiteTurn ? 14.5 : -14.5;
+            const targetY = 13.5;
+            gsap.to(camera.position, {
+                x: 0, y: targetY, z: targetZ,
+                duration: 1.2, ease: "power2.inOut"
+            });
+        }
+
+        /* =========================================================================
+           RUNIC HIGHLIGHTS & RAYCASTING INTERACTION
+           ========================================================================= */
         function clearMoveHighlights() {
             activeIndicators.forEach(mesh => scene.remove(mesh));
             activeIndicators.length = 0;
+            if (selectedSquare) {
+                const prevPiece = piecesMap.get(selectedSquare);
+                if (prevPiece) {
+                    gsap.to(prevPiece.position, { y: prevPiece.userData.baseY || 0.1, duration: 0.2 });
+                }
+            }
         }
 
         function showMoveHighlights(fromSq) {
@@ -1822,11 +2143,17 @@
             const moves = chess.moves({ square: fromSq, verbose: true });
             validMoveSquares = moves.map(m => m.to);
 
+            // Floating levitation effect on selected piece
+            const pieceMesh = piecesMap.get(fromSq);
+            if (pieceMesh) {
+                gsap.to(pieceMesh.position, { y: 0.35, duration: 0.22, ease: "power1.out" });
+            }
+
             moves.forEach(m => {
                 const targetPos = squareToPos(m.to);
                 const isCapture = !!m.captured;
 
-                const ringGeo = new THREE.RingGeometry(0.28, 0.58, 20);
+                const ringGeo = new THREE.RingGeometry(0.3, 0.62, 24);
                 const mat = isCapture ? highlightCaptureMat : highlightMoveMat;
                 const ring = new THREE.Mesh(ringGeo, mat);
                 ring.rotation.x = -Math.PI / 2;
@@ -1836,12 +2163,33 @@
             });
         }
 
+        function showPromotionModal(callback) {
+            const modal = document.getElementById('promo-modal');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            const buttons = modal.querySelectorAll('[data-promo]');
+            const handler = (e) => {
+                const btn = e.currentTarget;
+                const promo = btn.getAttribute('data-promo') || 'q';
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                buttons.forEach(b => b.removeEventListener('click', handler));
+                callback(promo);
+            };
+            buttons.forEach(b => b.addEventListener('click', handler));
+        }
+
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
+        let pointerDownPos = { x: 0, y: 0 };
 
-        function onPointerDown(event) {
-            if (isAnimating || chess.game_over() || chess.turn() !== 'w') return;
-            if (event.target.closest('header, aside, #game-modal, #movie-quote-container')) return;
+        function onPointerClick(event) {
+            if (isAnimating || chess.game_over()) return;
+            if (gameMode === 'ai' && chess.turn() !== 'w') return;
+            if (event.target.closest('header, aside, #game-modal, #promo-modal, #spellbook-modal, #story-banner, #movie-quote-container')) return;
+
+            soundFX.init();
+            if (!soundFX.isMusicPlaying && soundFX.enabled) {
+                soundFX.startSoundtrack();
+            }
 
             mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
             mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -1880,14 +2228,25 @@
 
                 if (selectedSquare && validMoveSquares.includes(hitSquare)) {
                     const from = selectedSquare;
+                    const to = hitSquare;
                     selectedSquare = null;
                     clearMoveHighlights();
-                    executeAnimatedMove(from, hitSquare);
+
+                    const movingPiece = chess.get(from);
+                    if (movingPiece && movingPiece.type === 'p' && ((movingPiece.color === 'w' && to[1] === '8') || (movingPiece.color === 'b' && to[1] === '1'))) {
+                        showPromotionModal((promoChoice) => {
+                            executeAnimatedMove(from, to, false, null, promoChoice);
+                        });
+                        return;
+                    }
+
+                    executeAnimatedMove(from, to);
                     return;
                 }
 
                 const pieceOnSquare = chess.get(hitSquare);
-                if (pieceOnSquare && pieceOnSquare.color === 'w') {
+                const currentTurn = chess.turn();
+                if (pieceOnSquare && pieceOnSquare.color === currentTurn) {
                     selectedSquare = hitSquare;
                     soundFX.playSelect();
                     showMoveHighlights(hitSquare);
@@ -1898,17 +2257,19 @@
             }
         }
 
+        /* =========================================================================
+           UI CHRONICLE & STATE MANAGEMENT
+           ========================================================================= */
         function updateUIChronicle(move) {
-            const statusEl = document.getElementById('match-status');
             const historyEl = document.getElementById('move-history');
-
             const turnNumber = Math.ceil(chess.history().length / 2);
             const colorName = move.color === 'w' ? 'Marble' : 'Obsidian';
+
             const logEntry = document.createElement('div');
             logEntry.className = "flex items-center justify-between text-[11px] py-0.5 border-b border-amber-900/30";
             logEntry.innerHTML = `
-                <span class="text-amber-200/75">${turnNumber}. ${colorName}</span>
-                <span class="font-mono font-medium ${move.color === 'w' ? 'text-amber-200' : 'text-stone-300'}">${move.san}</span>
+                <span class="text-amber-200/80">${turnNumber}. ${colorName}</span>
+                <span class="font-mono font-medium ${move.color === 'w' ? 'text-amber-300' : 'text-stone-300'}">${move.san}</span>
             `;
             historyEl.appendChild(logEntry);
             historyEl.scrollTop = historyEl.scrollHeight;
@@ -1916,7 +2277,8 @@
             updateCapturedRacks();
 
             const nextTurn = chess.turn() === 'w' ? "Harry's White Marble Move" : "Obsidian Legion Preparing...";
-            statusEl.textContent = nextTurn;
+            document.getElementById('turn-text').textContent = nextTurn;
+            document.getElementById('turn-dot').className = `inline-block w-2 h-2 rounded-full ${chess.turn() === 'w' ? 'bg-amber-400' : 'bg-stone-500'} animate-pulse`;
         }
 
         function updateCapturedRacks() {
@@ -1998,26 +2360,34 @@
 
         function resetGame() {
             chess.reset();
+            gameMode = 'ai';
             selectedSquare = null;
             clearMoveHighlights();
+            clearHintRays();
             spawnInitialPieces();
             hideGameOverModal();
 
-            document.getElementById('match-status').textContent = "Harry's White Marble Move";
+            document.getElementById('story-banner').classList.add('hidden');
+            document.getElementById('game-mode-badge').textContent = "Chamber of the Stone";
+            document.getElementById('mode-label').textContent = "Mode: Wizard AI";
+            document.getElementById('turn-text').textContent = "Harry's White Marble Move";
             document.getElementById('check-badge').classList.add('hidden');
-            document.getElementById('move-history').innerHTML = '<div class="text-amber-300/60 italic font-hp-narrative text-[13px]">The stone sentinels take their stations...</div>';
+            document.getElementById('move-history').innerHTML = '<div class="text-amber-300/60 italic font-hp-narrative text-[13px]">The stone sentinels take their stations in the Chamber...</div>';
             document.getElementById('captured-black').textContent = '';
             document.getElementById('captured-white').textContent = '';
             document.getElementById('score-w').textContent = '+0';
             document.getElementById('score-b').textContent = '+0';
         }
 
+        /* =========================================================================
+           SETUP UI CONTROLS & CAMERA PRESETS
+           ========================================================================= */
         function setupUIControls() {
             const cameraPresets = [
                 { name: "POV: Ron's Seat", pos: [0, 13.5, 14.5], target: [0, 0, 0] },
                 { name: "POV: Low Knight Angle", pos: [-6, 6, 8.5], target: [0, 1.2, 0] },
                 { name: "POV: Harry & Hermione", pos: [13, 9, 11], target: [0, 0, 0] },
-                { name: "POV: Chamber Overhead", pos: [0, 21, 0.1], target: [0, 0, 0] }
+                { name: "POV: Chamber Overhead", pos: [0, 22, 0.1], target: [0, 0, 0] }
             ];
 
             const camBtn = document.getElementById('btn-camera');
@@ -2028,33 +2398,51 @@
                 const preset = cameraPresets[cameraModeIndex];
                 camLabel.textContent = preset.name;
                 gsap.to(camera.position, {
-                    x: preset.pos[0],
-                    y: preset.pos[1],
-                    z: preset.pos[2],
-                    duration: 1.2,
-                    ease: "power2.inOut"
+                    x: preset.pos[0], y: preset.pos[1], z: preset.pos[2],
+                    duration: 1.2, ease: "power2.inOut"
                 });
                 gsap.to(controls.target, {
-                    x: preset.target[0],
-                    y: preset.target[1],
-                    z: preset.target[2],
-                    duration: 1.2,
-                    ease: "power2.inOut"
+                    x: preset.target[0], y: preset.target[1], z: preset.target[2],
+                    duration: 1.2, ease: "power2.inOut"
                 });
             });
 
-            const diffs = ['novice', 'apprentice', 'archmage'];
+            // AI Difficulty Selector
+            const diffs = ['ron', 'hermione', 'mcgonagall', 'voldemort'];
             const diffLabels = {
-                novice: 'AI: First Year',
-                apprentice: 'AI: Hogwarts Prefect',
-                archmage: 'AI: Grand Sorcerer'
+                ron: 'AI: Ron Weasley',
+                hermione: 'AI: Hermione Granger',
+                mcgonagall: 'AI: McGonagall',
+                voldemort: 'AI: Voldemort'
             };
             document.getElementById('btn-difficulty').addEventListener('click', () => {
                 const currentIdx = diffs.indexOf(aiDifficulty);
                 aiDifficulty = diffs[(currentIdx + 1) % diffs.length];
                 document.getElementById('diff-label').textContent = diffLabels[aiDifficulty];
+                showMovieQuote(`Opponent set to ${diffLabels[aiDifficulty]}`);
             });
 
+            // Mode Selector
+            const modes = ['ai', 'duel_2p', 'movie_puzzle'];
+            const modeLabels = {
+                ai: 'Mode: Wizard AI',
+                duel_2p: 'Mode: 2P Duel',
+                movie_puzzle: "Mode: Ron's Sacrifice"
+            };
+            document.getElementById('btn-mode').addEventListener('click', () => {
+                const currentIdx = modes.indexOf(gameMode);
+                const nextMode = modes[(currentIdx + 1) % modes.length];
+                if (nextMode === 'movie_puzzle') {
+                    startRonSacrificeMode();
+                } else {
+                    gameMode = nextMode;
+                    document.getElementById('mode-label').textContent = modeLabels[nextMode];
+                    document.getElementById('story-banner').classList.add('hidden');
+                    resetGame();
+                }
+            });
+
+            // Sound Toggle
             const soundBtn = document.getElementById('btn-sound');
             const soundIcon = document.getElementById('sound-icon');
             soundBtn.addEventListener('click', () => {
@@ -2064,25 +2452,64 @@
                     : "fa-solid fa-volume-xmark text-stone-500 text-xs";
             });
 
+            // Lumos Hint & Undo
+            document.getElementById('btn-hint').addEventListener('click', castLumosHint);
+            document.getElementById('btn-undo').addEventListener('click', castTimeTurnerUndo);
+
+            // Action Cam Indicator Click Toggle
+            const actionCamIndicator = document.getElementById('action-cam-indicator');
+            actionCamIndicator.addEventListener('click', () => {
+                actionCamEnabled = !actionCamEnabled;
+                actionCamIndicator.textContent = actionCamEnabled ? "Action Cam ON" : "Action Cam OFF";
+                actionCamIndicator.className = actionCamEnabled 
+                    ? "text-[9px] px-1.5 py-0.2 rounded bg-amber-900/60 text-amber-300 cursor-pointer"
+                    : "text-[9px] px-1.5 py-0.2 rounded bg-stone-900/60 text-stone-400 cursor-pointer";
+            });
+
+            // Spellbook Guide
+            const spellbookModal = document.getElementById('spellbook-modal');
+            document.getElementById('btn-spellbook').addEventListener('click', () => {
+                spellbookModal.classList.remove('opacity-0', 'pointer-events-none');
+            });
+            document.getElementById('spellbook-close').addEventListener('click', () => {
+                spellbookModal.classList.add('opacity-0', 'pointer-events-none');
+            });
+
             document.getElementById('btn-reset').addEventListener('click', resetGame);
             document.getElementById('modal-btn-restart').addEventListener('click', resetGame);
+            document.getElementById('modal-btn-movie-mode').addEventListener('click', () => {
+                hideGameOverModal();
+                startRonSacrificeMode();
+            });
+
+            // Keyboard Shortcuts
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'h' || e.key === 'H') castLumosHint();
+                else if (e.key === 'z' || e.key === 'Z') castTimeTurnerUndo();
+                else if (e.key === 'c' || e.key === 'C') camBtn.click();
+                else if (e.key === 'm' || e.key === 'M') soundBtn.click();
+            });
         }
 
         function onWindowResize() {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
+            if (composer) {
+                composer.setSize(window.innerWidth, window.innerHeight);
+            }
         }
 
+        /* =========================================================================
+           SCENE INITIALIZATION & POST-PROCESSING (Bloom & Filmic Tone Mapping)
+           ========================================================================= */
         function initScene() {
             const canvas = document.getElementById('webgl-canvas');
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x06090e);
+            scene.background = new THREE.Color(0x04060a);
+            scene.fog = new THREE.Fog(0x04060a, 26, 88);
 
-            // Movie dungeon depth fog
-            scene.fog = new THREE.Fog(0x06090e, 28, 85);
-
-            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 150);
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 160);
             camera.position.set(0, 13.5, 14.5);
 
             renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: "high-performance" });
@@ -2090,18 +2517,36 @@
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             renderer.shadowMap.enabled = true;
             renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
-            // ACES Filmic tone mapping for movie cinema contrast
             renderer.toneMapping = THREE.ACESFilmicToneMapping;
-            renderer.toneMappingExposure = 1.15;
+            renderer.toneMappingExposure = 1.18;
 
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.06;
             controls.maxPolarAngle = Math.PI / 2.05;
             controls.minDistance = 6;
-            controls.maxDistance = 32;
+            controls.maxDistance = 34;
             controls.target.set(0, 0.4, 0);
+
+            // UnrealBloomPass Post-Processing
+            try {
+                if (THREE.EffectComposer && THREE.RenderPass && THREE.UnrealBloomPass) {
+                    composer = new THREE.EffectComposer(renderer);
+                    const renderPass = new THREE.RenderPass(scene, camera);
+                    composer.addPass(renderPass);
+
+                    const bloomPass = new THREE.UnrealBloomPass(
+                        new THREE.Vector2(window.innerWidth, window.innerHeight),
+                        0.42, // strength
+                        0.4,  // radius
+                        0.88  // threshold
+                    );
+                    composer.addPass(bloomPass);
+                }
+            } catch (e) {
+                console.warn("Post-processing bloom fallback:", e);
+                composer = null;
+            }
 
             initMaterials();
             setupChamberLighting();
@@ -2109,21 +2554,21 @@
             buildChessBoard();
             spawnInitialPieces();
 
-            // Atmospheric drifting ember particles from flambeaux
+            // Atmospheric drifting ash & ember motes
             const emberGeo = new THREE.BufferGeometry();
-            const emberCount = 60;
+            const emberCount = 80;
             const emberPositions = new Float32Array(emberCount * 3);
             for (let i = 0; i < emberCount * 3; i += 3) {
-                emberPositions[i] = (Math.random() - 0.5) * 24;
-                emberPositions[i + 1] = Math.random() * 11 + 0.5;
-                emberPositions[i + 2] = (Math.random() - 0.5) * 24;
+                emberPositions[i] = (Math.random() - 0.5) * 26;
+                emberPositions[i + 1] = Math.random() * 12 + 0.5;
+                emberPositions[i + 2] = (Math.random() - 0.5) * 26;
             }
             emberGeo.setAttribute('position', new THREE.BufferAttribute(emberPositions, 3));
             const emberMat = new THREE.PointsMaterial({
-                color: 0xdf8a28,
-                size: 0.12,
+                color: 0xe59230,
+                size: 0.14,
                 transparent: true,
-                opacity: 0.55,
+                opacity: 0.6,
                 blending: THREE.AdditiveBlending
             });
             const emberParticles = new THREE.Points(emberGeo, emberMat);
@@ -2131,9 +2576,20 @@
             atmosphericEmbers.push(emberParticles);
 
             window.addEventListener('resize', onWindowResize);
-            window.addEventListener('pointerdown', onPointerDown);
+            window.addEventListener('pointerdown', (e) => {
+                pointerDownPos = { x: e.clientX, y: e.clientY };
+            });
+            window.addEventListener('pointerup', (e) => {
+                const dist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
+                if (dist < 8) {
+                    onPointerClick(e);
+                }
+            });
         }
 
+        /* =========================================================================
+           MAIN ANIMATION & RENDER LOOP
+           ========================================================================= */
         function animate() {
             requestAnimationFrame(animate);
 
@@ -2141,26 +2597,30 @@
 
             const time = performance.now() * 0.001;
 
-            // Gentle torch flicker
+            // Flickering torches & braziers
             torchLights.forEach(t => {
-                t.light.intensity = t.baseInt + Math.sin(time * 2.2 + t.seed) * 0.07 + Math.cos(time * 1.5 + t.seed) * 0.04;
+                t.light.intensity = t.baseInt + Math.sin(time * 2.4 + t.seed) * 0.08 + Math.cos(time * 1.6 + t.seed) * 0.05;
             });
 
-            // Drifting ash motes
+            // Drifting ambient embers
             atmosphericEmbers.forEach(em => {
                 const positions = em.geometry.attributes.position.array;
                 for (let i = 1; i < positions.length; i += 3) {
-                    positions[i] += 0.008;
-                    if (positions[i] > 12) positions[i] = 0.5;
+                    positions[i] += 0.009;
+                    if (positions[i] > 13) positions[i] = 0.5;
                 }
                 em.geometry.attributes.position.needsUpdate = true;
             });
 
+            // Run active particle systems (shards, debris)
             for (let i = particleSystems.length - 1; i >= 0; i--) {
                 particleSystems[i]();
             }
 
-            if (renderer && scene && camera) {
+            // Render with UnrealBloomPass if supported, otherwise standard render
+            if (composer && postProcessingEnabled) {
+                composer.render();
+            } else if (renderer && scene && camera) {
                 renderer.render(scene, camera);
             }
         }
